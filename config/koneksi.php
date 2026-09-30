@@ -3,7 +3,7 @@
 $host = "localhost";
 $user = "root";
 $password = "";
-$database = "ukk-2026";
+$database = "db_ukk_2026";
 
 $koneksi = mysqli_connect($host, $user, $password, $database);
 
