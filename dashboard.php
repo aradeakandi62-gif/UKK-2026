@@ -37,7 +37,7 @@ include "includes/cek_session.php";
 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') : ?>
 
     <li class="nav-item mb-2">
-        <a href="Data Siswa" class="nav-link text-white">
+        <a href="data_siswa.php" class="nav-link text-white mb-2">
             Data Siswa
         </a>
     </li>
