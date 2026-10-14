@@ -49,11 +49,13 @@ include "includes/cek_session.php";
     </li>
 
 <?php endif; ?>
-                <li class="nav-item mb-2">
-                    <a href="Kelas" class="nav-link text-white">
-                        Kelas
-                    </a>
-                </li>
+                
+        <li class="nav-item mb-2">
+            <a href="data_kelas.php" class="nav-link text-white">
+                Kelas
+            </a>
+        </li>
+
 
                 <li class="nav-item mb-2">
                     <a href="Laporan" class="nav-link text-white">
