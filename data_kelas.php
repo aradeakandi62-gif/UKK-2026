@@ -1,11 +1,10 @@
-
 <?php
 session_start();
 include 'config/koneksi.php';
 include 'includes/cek_session.php';
 
 // Ambil data kelas
-$query = mysqli_query($koneksi, "SELECT * FROM t_kelas");
+$query = mysqli_query($koneksi, "SELECT * FROM t_kelas ORDER BY id DESC");
 ?>
 
 <!DOCTYPE html>
@@ -18,44 +17,17 @@ $query = mysqli_query($koneksi, "SELECT * FROM t_kelas");
           rel="stylesheet">
 </head>
 <body>
+
 <div class="container-fluid">
     <div class="row">
 
-        <!-- Sidebar -->
-        <div class="col-md-2 bg-dark min-vh-100 p-3">
-            <h4 class="text-white mb-4">My Website</h4>
-
-            <ul class="nav nav-pills flex-column gap-2">
-                <li class="nav-item">
-                    <a href="dashboard.php" class="nav-link text-white">
-                        Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="data_siswa.php" class="nav-link text-white">
-                        Data Siswa
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="data_guru.php" class="nav-link text-white">
-                        Data Guru
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="data_kelas.php" class="nav-link active">
-                        Data Kelas
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="logout.php" class="nav-link text-danger">
-                        Logout
-                    </a>
-                </li>
-            </ul>
-        </div>
+        <?php
+        include "layout/sidebar.php";
+        ?>
 
         <!-- Konten -->
         <div class="col-md-10 p-4">
+
             <h2>Data Kelas</h2>
             <p class="text-secondary">Daftar data kelas</p>
 
@@ -69,14 +41,19 @@ $query = mysqli_query($koneksi, "SELECT * FROM t_kelas");
 
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
+
+                        <table class="table table-bordered table-striped table-hover">
                             <thead class="table-dark">
                                 <tr>
                                     <th>No</th>
-                                    <th>Data Kelas</th>
+                                    <th>Nama Kelas</th>
+                                    <th>Tingkat</th>
+                                    <th>Jurusan</th>
+                                    <th>Status</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
+
                             <tbody>
                             <?php
                             $no = 1;
@@ -86,18 +63,33 @@ $query = mysqli_query($koneksi, "SELECT * FROM t_kelas");
                             ?>
                                 <tr>
                                     <td><?= $no++ ?></td>
+
                                     <td>
-                                        <?php
-                                        echo htmlspecialchars(
-                                            json_encode($data, JSON_UNESCAPED_UNICODE)
-                                        );
-                                        ?>
+                                        <?= htmlspecialchars($data['nama'] ?? '-') ?>
                                     </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($data['tingkat'] ?? '-') ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($data['jurusan'] ?? '-') ?>
+                                    </td>
+
+                                    <td>
+                                        <?php if (isset($data['status_aktif']) && $data['status_aktif'] == 1): ?>
+                                            <span class="badge bg-success">Aktif</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary">Tidak Aktif</span>
+                                        <?php endif; ?>
+                                    </td>
+
                                     <td>
                                         <a href="edit_kelas.php?id=<?= (int)$data['id'] ?>"
                                            class="btn btn-warning btn-sm">
                                             Edit
                                         </a>
+
                                         <a href="hapus_kelas.php?id=<?= (int)$data['id'] ?>"
                                            class="btn btn-danger btn-sm"
                                            onclick="return confirm('Yakin ingin menghapus kelas ini?')">
@@ -105,24 +97,27 @@ $query = mysqli_query($koneksi, "SELECT * FROM t_kelas");
                                         </a>
                                     </td>
                                 </tr>
+
                             <?php
                                 endwhile;
                             else:
                             ?>
                                 <tr>
-                                    <td colspan="3" class="text-center">
+                                    <td colspan="6" class="text-center">
                                         Belum ada data kelas.
                                     </td>
                                 </tr>
                             <?php endif; ?>
                             </tbody>
                         </table>
+
                     </div>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
 </div>
+
 </body>
 </html>

@@ -1,265 +1,167 @@
 <?php
-
+session_start();
 include 'config/koneksi.php';
+include 'includes/cek_session.php';
 
-if (isset($_POST['simpan'])) {
+$error = '';
 
-    $nip = $_POST['nip'];
-    $nama = $_POST['nama'];
-    $email = $_POST['email'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nip = trim($_POST['nip'] ?? '');
+    $nama = trim($_POST['nama'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $user_id = (int) ($_POST['user_id'] ?? 0);
 
-    $status_aktif = 1;
-
-    $query = mysqli_query($koneksi, "INSERT INTO t_guru
-        (nip, nama, email, status_aktif)
-        VALUES
-        ('$nip', '$nama', '$email', '$status_aktif')
-    ");
-
-    if ($query) {
-        header("Location: data_guru.php");
-        exit;
+    if ($nip === '' || $nama === '' || $email === '' || $user_id <= 0) {
+        $error = 'Semua data wajib diisi!';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Format email tidak valid!';
     } else {
-        echo "Data guru gagal ditambahkan: " . mysqli_error($koneksi);
-    }
+        $stmt = mysqli_prepare(
+            $koneksi,
+            "INSERT INTO t_guru
+             (nip, nama, email, status_aktif, user_id, created_at, updated_at)
+             VALUES (?, ?, ?, 1, ?, NOW(), NOW())"
+        );
 
+        mysqli_stmt_bind_param(
+            $stmt,
+            "sssi",
+            $nip,
+            $nama,
+            $email,
+            $user_id
+        );
+
+        if (mysqli_stmt_execute($stmt)) {
+            mysqli_stmt_close($stmt);
+            header('Location: data_guru.php');
+            exit;
+        } else {
+            $error = 'Gagal menyimpan guru: ' . mysqli_stmt_error($stmt);
+        }
+
+        mysqli_stmt_close($stmt);
+    }
 }
 
+$query_user = mysqli_query(
+    $koneksi,
+    "SELECT id, name, email FROM t_users ORDER BY name ASC"
+);
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tambah Guru</title>
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet">
 </head>
-
 <body>
+<div class="container-fluid">
+    <div class="row">
 
-<div class="d-flex">
+        <div class="col-md-2 bg-dark min-vh-100 p-3">
+            <h4 class="text-white mb-4">My Website</h4>
 
-    <!-- SIDEBAR -->
-    <div class="bg-dark text-white p-3 min-vh-100"
-         style="width: 230px;">
-
-        <h4 class="mb-4">
-            My Website
-        </h4>
-
-        <div class="nav flex-column">
-
-            <a href="dashboard.php"
-               class="nav-link text-white mb-2">
-                Dashboard
-            </a>
-
-            <a href="data_siswa.php"
-               class="nav-link text-white mb-2">
-                Data Siswa
-            </a>
-
-            <a href="data_guru.php"
-               class="nav-link text-white mb-2">
-                Data Guru
-            </a>
-
-            <a href="kelas.php"
-               class="nav-link text-white mb-2">
-                Kelas
-            </a>
-
-            <a href="laporan.php"
-               class="nav-link text-white mb-2">
-                Laporan
-            </a>
-
-            <a href="about.php"
-               class="nav-link text-white mb-4">
-                About Me
-            </a>
-
-            <hr>
-
-            <a href="logout.php"
-               class="nav-link text-danger">
-                Logout
-            </a>
-
+            <ul class="nav nav-pills flex-column gap-2">
+                <li class="nav-item">
+                    <a href="dashboard.php" class="nav-link text-white">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a href="data_siswa.php" class="nav-link text-white">Data Siswa</a>
+                </li>
+                <li class="nav-item">
+                    <a href="data_guru.php" class="nav-link active">Data Guru</a>
+                </li>
+                <li class="nav-item">
+                    <a href="data_kelas.php" class="nav-link text-white">Kelas</a>
+                </li>
+                <li class="nav-item">
+                    <a href="logout.php" class="nav-link text-danger">Logout</a>
+                </li>
+            </ul>
         </div>
 
-    </div>
+        <div class="col-md-10 p-4">
+            <h2>Tambah Guru</h2>
+            <p class="text-secondary">Tambahkan data guru baru</p>
 
+            <?php if ($error !== ''): ?>
+                <div class="alert alert-danger">
+                    <?= htmlspecialchars($error) ?>
+                </div>
+            <?php endif; ?>
 
-    <!-- CONTENT -->
-    <div class="flex-grow-1 p-4">
+            <div class="card">
+                <div class="card-header">
+                    <strong>Form Tambah Guru</strong>
+                </div>
 
-        <h2>Tambah Guru</h2>
+                <div class="card-body">
+                    <form method="POST" action="tambah_guru.php">
 
-        <p class="text-muted">
-            Tambahkan data guru baru
-        </p>
+                        <div class="mb-3">
+                            <label for="nip" class="form-label">NIP</label>
+                            <input type="text" name="nip" id="nip"
+                                   class="form-control"
+                                   placeholder="Masukkan NIP"
+                                   value="<?= htmlspecialchars($_POST['nip'] ?? '') ?>"
+                                   required>
+                        </div>
 
-        <div class="card">
+                        <div class="mb-3">
+                            <label for="nama" class="form-label">Nama Guru</label>
+                            <input type="text" name="nama" id="nama"
+                                   class="form-control"
+                                   placeholder="Masukkan nama guru"
+                                   value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>"
+                                   required>
+                        </div>
 
-            <div class="card-header">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" name="email" id="email"
+                                   class="form-control"
+                                   placeholder="Masukkan email guru"
+                                   value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+                                   required>
+                        </div>
 
-                <strong>
-                    Form Tambah Guru
-                </strong>
+                        <div class="mb-3">
+                            <label for="user_id" class="form-label">User</label>
+                            <select name="user_id" id="user_id"
+                                    class="form-select" required>
+                                <option value="">-- Pilih User --</option>
 
-            </div>
+                                <?php if ($query_user): ?>
+                                    <?php while ($user = mysqli_fetch_assoc($query_user)): ?>
+                                        <option value="<?= (int)$user['id'] ?>"
+                                            <?= (($_POST['user_id'] ?? '') == $user['id']) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($user['name']) ?>
+                                            (<?= htmlspecialchars($user['email']) ?>)
+                                        </option>
+                                    <?php endwhile; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
 
-            <div class="card-body">
-
-                <form method="POST">
-
-                    <!-- NIP -->
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            NIP
-                        </label>
-
-                        <input
-                            type="text"
-                            name="nip"
-                            class="form-control"
-                            placeholder="Masukkan NIP"
-                            required>
-
-                    </div>
-
-
-                    <!-- NAMA -->
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Nama Guru
-                        </label>
-
-                        <input
-                            type="text"
-                            name="nama"
-                            class="form-control"
-                            placeholder="Masukkan nama guru"
-                            required>
-
-                    </div>
-
-
-                    <!-- EMAIL -->
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Email
-                        </label>
-
-                        <input
-                            type="email"
-                            name="email"
-                            class="form-control"
-                            placeholder="Masukkan email guru"
-                            required>
-
-                    </div>
-
-
-                    <!-- USER -->
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            User
-                        </label>
-
-                        <select
-                            name="user_id"
-                            class="form-select"
-                            required>
-
-                            <option value="">
-                                -- Pilih User --
-                            </option>
-
-                            <?php while ($user = mysqli_fetch_assoc($users)) { ?>
-
-                                <option value="<?= $user['id']; ?>">
-
-                                    <?= htmlspecialchars($user['name']); ?>
-
-                                    -
-                                    <?= htmlspecialchars($user['email']); ?>
-
-                                </option>
-
-                            <?php } ?>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- STATUS -->
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Status
-                        </label>
-
-                        <select
-                            name="status_aktif"
-                            class="form-select"
-                            required>
-
-                            <option value="1">
-                                Aktif
-                            </option>
-
-                            <option value="0">
-                                Tidak Aktif
-                            </option>
-
-                        </select>
-
-                    </div>
-                
-                    <!-- BUTTON -->
-                    <div class="d-flex gap-2">
-
-                        <button
-                            type="submit"
-                            name="simpan"
-                            class="btn btn-primary">
-                            Simpan
+                        <button type="submit" class="btn btn-primary">
+                            Simpan Guru
                         </button>
 
-                        <a
-                            href="data_guru.php"
-                            class="btn btn-secondary">
+                        <a href="data_guru.php" class="btn btn-secondary">
                             Kembali
                         </a>
 
-                    </div>
-
-                </form>
-                
+                    </form>
+                </div>
             </div>
-
         </div>
 
     </div>
-
 </div>
-
 </body>
-
 </html>
