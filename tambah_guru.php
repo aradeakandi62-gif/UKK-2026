@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 include 'config/koneksi.php';
@@ -16,39 +17,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Format email tidak valid!';
     } else {
-        $stmt = mysqli_prepare(
+        // Periksa apakah NIP sudah digunakan
+        $cek = mysqli_prepare(
             $koneksi,
-            "INSERT INTO t_guru
-             (nip, nama, email, status_aktif, user_id, created_at, updated_at)
-             VALUES (?, ?, ?, 1, ?, NOW(), NOW())"
+            "SELECT id FROM t_guru WHERE nip = ? OR email = ? LIMIT 1"
         );
 
-        mysqli_stmt_bind_param(
-            $stmt,
-            "sssi",
-            $nip,
-            $nama,
-            $email,
-            $user_id
-        );
+        mysqli_stmt_bind_param($cek, "ss", $nip, $email);
+        mysqli_stmt_execute($cek);
+        $hasil = mysqli_stmt_get_result($cek);
 
-        if (mysqli_stmt_execute($stmt)) {
-            mysqli_stmt_close($stmt);
-            header('Location: data_guru.php');
-            exit;
+        if (mysqli_num_rows($hasil) > 0) {
+            $error = 'NIP atau email sudah terdaftar!';
         } else {
-            $error = 'Gagal menyimpan guru: ' . mysqli_stmt_error($stmt);
+            // Simpan data guru
+            $stmt = mysqli_prepare(
+                $koneksi,
+                "INSERT INTO t_guru
+                (nip, nama, email, status_aktif, user_id, created_at, updated_at)
+                VALUES (?, ?, ?, 1, ?, NOW(), NOW())"
+            );
+
+            if ($stmt) {
+                mysqli_stmt_bind_param(
+                    $stmt,
+                    "sssi",
+                    $nip,
+                    $nama,
+                    $email,
+                    $user_id
+                );
+
+                if (mysqli_stmt_execute($stmt)) {
+                    mysqli_stmt_close($stmt);
+                    mysqli_stmt_close($cek);
+
+                    header('Location: data_guru.php');
+                    exit;
+                } else {
+                    $error = 'Gagal menyimpan: ' . mysqli_stmt_error($stmt);
+                    mysqli_stmt_close($stmt);
+                }
+            } else {
+                $error = 'Query gagal: ' . mysqli_error($koneksi);
+            }
         }
 
-        mysqli_stmt_close($stmt);
+        mysqli_stmt_close($cek);
     }
 }
 
+// Ambil data user untuk pilihan
 $query_user = mysqli_query(
     $koneksi,
     "SELECT id, name, email FROM t_users ORDER BY name ASC"
 );
+
+if (!$query_user) {
+    $error = 'Gagal mengambil data user: ' . mysqli_error($koneksi);
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">

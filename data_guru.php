@@ -1,8 +1,11 @@
 <?php
 include 'config/koneksi.php';
 
-// Ambil data guru
 $query = mysqli_query($koneksi, "SELECT * FROM t_guru");
+
+if (!$query) {
+    die("Query gagal: " . mysqli_error($koneksi));
+}
 ?>
 
 <!DOCTYPE html>
@@ -63,24 +66,16 @@ $query = mysqli_query($koneksi, "SELECT * FROM t_guru");
 
                     <table class="table table-bordered table-striped">
 
-                        <thead class="table-dark">
-
-                            <tr>
-
-                                <th>No</th>
-
-                                <th>NIP</th>
-
-                                <th>Nama Guru</th>
-
-                                <th>Jenis Kelamin</th>
-
-                                <th>Aksi</th>
-
-                            </tr>
-
-                        </thead>
-
+                        
+                <thead class="table-dark">
+                    <tr>
+                        <th>No</th>
+                        <th>NIP</th>
+                        <th>Nama Guru</th>
+                        <th>Email</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
 
                         <tbody>
 
@@ -88,52 +83,43 @@ $query = mysqli_query($koneksi, "SELECT * FROM t_guru");
 
                         $no = 1;
 
-                        while ($data = mysqli_fetch_assoc($query)) {
+                        while ($data = mysqli_fetch_assoc($query)) 
 
                         ?>
 
                             <tr>
 
-                                <td>
-                                    <?= $no++; ?>
-                                </td>
+                                
+                    <tbody>
+                        <?php
+                        $no = 1;
+
+                        while ($data = mysqli_fetch_assoc($query)) {
+                        ?>
+                            <tr>
+                                <td><?= $no++; ?></td>
+                                <td><?= htmlspecialchars($data['nip']); ?></td>
+                                <td><?= htmlspecialchars($data['nama']); ?></td>
+                                <td><?= htmlspecialchars($data['email']); ?></td>
 
                                 <td>
-                                    <?= htmlspecialchars($data['nip']); ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars($data['nama']); ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars($data['jenis_kelamin']); ?>
-                                </td>
-
-                                <td>
-
                                     <a href="edit_guru.php?id=<?= $data['id']; ?>"
-                                       class="btn btn-warning btn-sm">
+                                    class="btn btn-warning btn-sm">
                                         Edit
                                     </a>
 
                                     <a href="hapus_guru.php?id=<?= $data['id']; ?>"
-                                       class="btn btn-danger btn-sm"
-                                       onclick="return confirm('Yakin ingin menghapus data guru ini?')">
+                                    class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Yakin ingin menghapus data guru ini?')">
                                         Hapus
                                     </a>
-
                                 </td>
-
                             </tr>
-
                         <?php
-
                         }
-
                         ?>
+                    </tbody>
 
-                        </tbody>
 
                     </table>
 
