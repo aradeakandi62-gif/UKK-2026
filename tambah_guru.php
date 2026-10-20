@@ -124,73 +124,104 @@ if (!$query_user) {
                 </div>
             <?php endif; ?>
 
-            <div class="card">
-                <div class="card-header">
-                    <strong>Form Tambah Guru</strong>
-                </div>
+       
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12">
 
-                <div class="card-body">
-                    <form method="POST" action="tambah_guru.php">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+
+                    <h3 class="mb-1">Tambah Guru</h3>
+                    <p class="text-secondary mb-4">
+                        Tambahkan data guru baru ke dalam sistem
+                    </p>
+
+                    <form action="" method="POST">
 
                         <div class="mb-3">
                             <label for="nip" class="form-label">NIP</label>
-                            <input type="text" name="nip" id="nip"
+                            <input type="text"
+                                   name="nip"
+                                   id="nip"
                                    class="form-control"
                                    placeholder="Masukkan NIP"
-                                   value="<?= htmlspecialchars($_POST['nip'] ?? '') ?>"
                                    required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="nama" class="form-label">Nama Guru</label>
-                            <input type="text" name="nama" id="nama"
+                            <label for="nama" class="form-label">
+                                Nama Guru
+                            </label>
+                            <input type="text"
+                                   name="nama"
+                                   id="nama"
                                    class="form-control"
                                    placeholder="Masukkan nama guru"
-                                   value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>"
                                    required>
                         </div>
 
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input type="email" name="email" id="email"
+                            <input type="email"
+                                   name="email"
+                                   id="email"
                                    class="form-control"
                                    placeholder="Masukkan email guru"
-                                   value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
                                    required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="user_id" class="form-label">User</label>
-                            <select name="user_id" id="user_id"
-                                    class="form-select" required>
-                                <option value="">-- Pilih User --</option>
-
-                                <?php if ($query_user): ?>
-                                    <?php while ($user = mysqli_fetch_assoc($query_user)): ?>
-                                        <option value="<?= (int)$user['id'] ?>"
-                                            <?= (($_POST['user_id'] ?? '') == $user['id']) ? 'selected' : '' ?>>
-                                            <?= htmlspecialchars($user['name']) ?>
-                                            (<?= htmlspecialchars($user['email']) ?>)
-                                        </option>
-                                    <?php endwhile; ?>
-                                <?php endif; ?>
+                            <label for="status_aktif" class="form-label">
+                                Status
+                            </label>
+                            <select name="status_aktif"
+                                    id="status_aktif"
+                                    class="form-select"
+                                    required>
+                                <option value="1" selected>Aktif</option>
+                                <option value="0">Tidak Aktif</option>
                             </select>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">
-                            Simpan Guru
-                        </button>
+                        <div class="mb-3">
+                            <label for="user_id" class="form-label">
+                                User ID
+                            </label>
+                            <input type="number"
+                                   name="user_id"
+                                   id="user_id"
+                                   class="form-control"
+                                   placeholder="Masukkan User ID"
+                                   min="1"
+                                   required>
+                            <div class="form-text">
+                                Masukkan ID yang sudah ada pada tabel t_users.
+                            </div>
+                        </div>
 
-                        <a href="data_guru.php" class="btn btn-secondary">
-                            Kembali
-                        </a>
+                        <div class="d-flex gap-2 mt-4">
+                            <a href="data_guru.php"
+                               class="btn btn-secondary">
+                                Kembali
+                            </a>
+
+                            <button type="submit"
+                                    name="simpan"
+                                    value="1"
+                                    class="btn btn-primary">
+                                Simpan Guru
+                            </button>
+                        </div>
 
                     </form>
+
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
 </div>
+     
 </body>
 </html>

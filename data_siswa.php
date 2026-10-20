@@ -25,25 +25,9 @@ $query = mysqli_query($koneksi, "SELECT * FROM t_siswa");
 
 <div class="d-flex">
 
-    <!-- Sidebar -->
-    <div class="bg-dark text-white p-3"
-         style="width: 230px; min-height: 100vh; flex-shrink: 0;">
-
-        <h4 class="mb-4">My Website</h4>
-
-        <div class="nav flex-column">
-            <a href="dashboard.php" class="nav-link text-white mb-2">Dashboard</a>
-            <a href="data_siswa.php" class="nav-link text-white mb-2">Data Siswa</a>
-            <a href="data_guru.php" class="nav-link text-white mb-2">Data Guru</a>
-            <a href="kelas.php" class="nav-link text-white mb-2">Kelas</a>
-            <a href="laporan.php" class="nav-link text-white mb-2">Laporan</a>
-            <a href="about.php" class="nav-link text-white mb-4">About Me</a>
-
-            <hr>
-
-            <a href="logout.php" class="nav-link text-danger">Logout</a>
-        </div>
-    </div>
+    <?php
+    include "layout/sidebar.php";
+    ?>
 
     <!-- Content -->
     <div class="flex-grow-1 p-4" style="min-width: 0;">
