@@ -1,4 +1,5 @@
 
+
 <?php
 session_start();
 
@@ -13,17 +14,21 @@ $query = mysqli_query($koneksi, "
         s.nama AS nama_siswa,
         k.nama AS nama_kelas,
         ta.nama AS nama_tahun_ajaran
-    FROM t_kelas_siswa p
-    LEFT JOIN t_siswa s ON p.siswa_id = s.id
-    LEFT JOIN t_kelas k ON p.kelas_id = k.id
-    LEFT JOIN t_tahun_ajaran ta ON p.tahun_ajaran_id = ta.id
+    FROM t_kelas_siswa AS p
+    LEFT JOIN t_siswa AS s
+        ON p.siswa_id = s.id
+    LEFT JOIN t_kelas AS k
+        ON p.kelas_id = k.id
+    LEFT JOIN p.t_tahun_ajaran AS ta
+        ON p.tahun_pelajaran_id = ta.id
     ORDER BY p.id DESC
 ");
 
 if (!$query) {
-    die("Query gagal: " . mysqli_error($koneksi));
+    die('Query gagal: ' . mysqli_error($koneksi));
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">

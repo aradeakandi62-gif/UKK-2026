@@ -24,14 +24,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Tanggal selesai tidak boleh sebelum tanggal mulai.';
     } else {
         // Satu kelas tidak boleh memiliki dua wali kelas aktif
+        
+        
         $cek = mysqli_prepare($koneksi,
             "SELECT id FROM t_wali_kelas
-             WHERE kelas_id = ? AND tahun_ajaran_id = ?
-             AND status_aktif = 1"
+            WHERE kelas_id = ?
+            AND tahun_pelajaran_id = ?
+            AND status_aktif = 1"
         );
+
+        if (!$cek) {
+            die("Query pengecekan gagal: " . mysqli_error($koneksi));
+        }
+
         mysqli_stmt_bind_param($cek, "ii", $kelas_id, $tahun_id);
         mysqli_stmt_execute($cek);
+
         $hasil = mysqli_stmt_get_result($cek);
+
 
         if (mysqli_num_rows($hasil) > 0 && $status === 1) {
             $error = 'Kelas ini sudah memiliki wali kelas aktif pada tahun ajaran tersebut.';
