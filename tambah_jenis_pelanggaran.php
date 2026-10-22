@@ -1,4 +1,3 @@
-```php
 <?php
 session_start();
 
@@ -128,4 +127,3 @@ $kategori = mysqli_query(
 </div>
 </body>
 </html>
-```

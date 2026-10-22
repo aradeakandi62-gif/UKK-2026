@@ -43,7 +43,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <li class="nav-item mb-2">
             <a href="tahun_ajaran.php"
                class="nav-link <?= ($current_page == 'tahun_ajaran.php') ? 'active' : 'text-white' ?>">
-                tahun ajaran
+                Tahun ajaran
             </a>
         </li>
 
@@ -64,14 +64,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <li class="nav-item mb-2">
             <a href="kategori_pelanggaran.php"
                 class="nav-link <?= ($current_page == 'kategori_pelanggaran.php') ? 'active' : 'text-white' ?>">
-                kategori pelanggaran
+                Kategori pelanggaran
             </a>
         </li>
 
         <li class="nav-item mb-2">
             <a href="jenis_pelanggaran.php"
                 class="nav-link <?= ($current_page == 'jenis_pelanggaran.php') ? 'active' : 'text-white' ?>">
-                jenis pelanggaran
+                Jenis pelanggaran
             </a>
         </li>
 
@@ -83,8 +83,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </li>
 
         <li class="nav-item mb-2">
-            <a href="about.php"
-               class="nav-link <?= ($current_page == 'about.php') ? 'active' : 'text-white' ?>">
+            <a href="about_me.php"
+               class="nav-link <?= ($current_page == 'about_me.php') ? 'active' : 'text-white' ?>">
                 About Me
             </a>
         </li>

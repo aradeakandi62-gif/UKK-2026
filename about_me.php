@@ -1,196 +1,235 @@
+
 <?php
 session_start();
-include "config/koneksi.php";
 
-$nama = "Raja Kadu";
+include "includes/cek_session.php";
+
+// Data profil
+$nama = "anjay suranjay";
 $kelas = "XII RPL";
 $sekolah = "SMK Muhammadiyah Tasikmalaya";
 $jurusan = "Rekayasa Perangkat Lunak";
-$hobi = "Baca Buku";
+$hobi = "Tidur";
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>About Me | Nama Kamu </title>
+    <title>Profil Siswa</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-          rel="stylesheet">
-
-    <link rel="stylesheet" href="layout/style.css">
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
 </head>
 
-<body>
+<body class="bg-light">
 
 <div class="container-fluid">
     <div class="row">
 
-        <!-- SIDEBAR -->
-        <?php include 'layout/sidebar.php'; ?>
+        <!-- SIDEBAR SAMA DENGAN DASHBOARD -->
+        <?php include "layout/sidebar.php"; ?>
 
-        <!-- KONTEN -->
-        <main class="col-md-9 col-lg-10 main-content">
+        <!-- KONTEN PROFIL -->
+        <main class="col-md-9 col-lg-10 p-4">
 
-            <!-- HEADER -->
-            <div class="page-header">
-                <h1 class="page-title">Tentang Saya</h1>
-                <p class="text-secondary small mb-0">
-                    Mengenal lebih dekat dengan saya.
-                </p>
+            <h2 class="mb-1">Profil Siswa</h2>
+            <p class="text-muted mb-4">
+                Informasi data diri siswa
+            </p>
+
+            <div class="row justify-content-center">
+                <div class="col-12 col-lg-9 col-xl-8">
+
+                    <div class="card border-0 shadow-sm">
+
+                        <!-- HEADER NETRAL -->
+                        <div class="card-header bg-white text-dark p-4">
+                            <h4 class="fw-bold mb-1">
+                                <i class="bi bi-person-vcard me-2"></i>
+                                Profil Saya
+                            </h4>
+
+                            <p class="text-muted mb-0">
+                                Informasi pribadi dan pendidikan
+                            </p>
+                        </div>
+
+                        <div class="card-body p-4">
+
+                            <!-- FOTO DAN NAMA -->
+                            <div class="text-center mb-4">
+
+                                <img
+                                    src="jamet.jpg"
+                                    alt="Foto Profil"
+                                    width="140"
+                                    height="140"
+                                    class="rounded-circle img-thumbnail mb-3"
+                                    style="object-fit: cover;"
+                                >
+
+                                <h3 class="fw-bold mb-2">
+                                    <?= htmlspecialchars($nama); ?>
+                                </h3>
+
+                                <span class="badge bg-secondary px-3 py-2">
+                                    <?= htmlspecialchars($kelas); ?>
+                                </span>
+
+                            </div>
+
+                            <hr>
+
+                            <!-- DATA DIRI -->
+                            <h5 class="fw-bold mb-3">
+                                Data Diri
+                            </h5>
+
+                            <div class="list-group list-group-flush">
+
+                                <div class="list-group-item px-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person fs-4 me-3"></i>
+
+                                        <div>
+                                            <small class="text-muted">
+                                                Nama Lengkap
+                                            </small>
+
+                                            <div class="fw-semibold">
+                                                <?= htmlspecialchars($nama); ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="list-group-item px-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-people fs-4 me-3"></i>
+
+                                        <div>
+                                            <small class="text-muted">
+                                                Kelas
+                                            </small>
+
+                                            <div class="fw-semibold">
+                                                <?= htmlspecialchars($kelas); ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="list-group-item px-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-mortarboard fs-4 me-3"></i>
+
+                                        <div>
+                                            <small class="text-muted">
+                                                Jurusan
+                                            </small>
+
+                                            <div class="fw-semibold">
+                                                <?= htmlspecialchars($jurusan); ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="list-group-item px-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-building fs-4 me-3"></i>
+
+                                        <div>
+                                            <small class="text-muted">
+                                                Nama Sekolah
+                                            </small>
+
+                                            <div class="fw-semibold">
+                                                <?= htmlspecialchars($sekolah); ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="list-group-item px-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-heart fs-4 me-3"></i>
+
+                                        <div>
+                                            <small class="text-muted">
+                                                Hobi
+                                            </small>
+
+                                            <div class="fw-semibold">
+                                                <?= htmlspecialchars($hobi); ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- TENTANG SAYA -->
+                            <div class="card bg-light border mt-4">
+                                <div class="card-body">
+                                    <h5 class="fw-bold">
+                                        <i class="bi bi-chat-square-text me-2"></i>
+                                        Tentang Saya
+                                    </h5>
+
+                                    <p class="mb-0">
+                                        Halo, saya
+                                        <?= htmlspecialchars($nama); ?>,
+                                        siswa kelas
+                                        <?= htmlspecialchars($kelas); ?>
+                                        di
+                                        <?= htmlspecialchars($sekolah); ?>.
+                                        Saya tertarik pada teknologi,
+                                        pemrograman, dan pengembangan website.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- TOMBOL KEMBALI -->
+                            <div class="d-flex justify-content-end mt-4">
+                                <a
+                                    href="dashboard.php"
+                                    class="btn btn-secondary"
+                                >
+                                    <i class="bi bi-arrow-left me-2"></i>
+                                    Kembali ke Dashboard
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <p class="text-muted text-center mt-3 small">
+                        &copy; <?= date('Y'); ?> UKK-2026
+                    </p>
+
+                </div>
             </div>
 
-            <!-- PROFIL DI TENGAH -->
-            <section class="profile-card">
-
-                <div class="profile-photo-wrapper">
-                    <img
-                        src="foto-profil.jpg"
-                        alt="Foto "
-                        class="profile-photo"
-                        onerror="this.onerror=null;this.src='foto-profil.png';"
-                    >
-                </div>
-
-                <h2 class="profile-name">
-                    <?php echo htmlspecialchars($nama); ?>
-                </h2>
-
-                <div class="profile-role">
-                    <?php echo htmlspecialchars($jurusan); ?>
-                </div>
-
-                <p class="profile-description">
-                    Halo, saya <?php echo htmlspecialchars($nama); ?>,
-                    seorang pelajar kelas
-                    <?php echo htmlspecialchars($kelas); ?> di
-                    <?php echo htmlspecialchars($sekolah); ?>.
-                    Saya memiliki ketertarikan pada teknologi,
-                    pengembangan website, dan desain antarmuka.
-                    Saya terus belajar untuk meningkatkan kemampuan
-                    serta menciptakan website yang bermanfaat,
-                    responsif, dan mudah digunakan.
-                </p>
-
-                <hr class="profile-divider">
-
-                <a href="dashboard.php" class="back-button">
-                    Kembali ke Dashboard
-                </a>
-
-            </section>
-
-            <!-- INFORMASI PERSONAL -->
-            <section class="mb-4">
-
-                <h3 class="section-title">Informasi Personal</h3>
-
-                <div class="row g-3">
-
-                    <div class="col-sm-6 col-xl-4">
-                        <div class="info-card">
-                            <div class="info-label">NAMA LENGKAP</div>
-                            <div class="info-value">
-                                <?php echo htmlspecialchars($nama); ?>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-xl-4">
-                        <div class="info-card">
-                            <div class="info-label">KELAS</div>
-                            <div class="info-value">
-                                <?php echo htmlspecialchars($kelas); ?>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-xl-4">
-                        <div class="info-card">
-                            <div class="info-label">HOBI</div>
-                            <div class="info-value">
-                                <?php echo htmlspecialchars($hobi); ?>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-xl-6">
-                        <div class="info-card">
-                            <div class="info-label">ASAL SEKOLAH</div>
-                            <div class="info-value">
-                                <?php echo htmlspecialchars($sekolah); ?>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-xl-6">
-                        <div class="info-card">
-                            <div class="info-label">JURUSAN</div>
-                            <div class="info-value">
-                                <?php echo htmlspecialchars($jurusan); ?>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-
-            <!-- DESKRIPSI DAN KEAHLIAN -->
-            <section class="row g-3">
-
-                <div class="col-lg-7">
-                    <div class="description-card">
-                        <h3 class="section-title">Deskripsi Diri</h3>
-
-                        <p>
-                            Saya adalah seorang pelajar yang sedang
-                            mendalami Rekayasa Perangkat Lunak. Saya
-                            senang mempelajari teknologi, memahami
-                            cara kerja website, dan mencoba hal-hal
-                            baru dalam pemrograman.
-                        </p>
-
-                        <p class="mt-3">
-                            Saya ingin terus mengembangkan kemampuan
-                            di bidang web development dan bercita-cita
-                            menjadi seorang Web Developer yang mampu
-                            menghasilkan karya digital berkualitas.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-lg-5">
-                    <div class="description-card">
-                        <h3 class="section-title">Bidang yang Dipelajari</h3>
-
-                        <span class="skill-item">HTML</span>
-                        <span class="skill-item">CSS</span>
-                        <span class="skill-item">PHP</span>
-                        <span class="skill-item">Bootstrap</span>
-                        <span class="skill-item">MySQL</span>
-                        <span class="skill-item">Web Development</span>
-
-                        <hr style="border-color: #e8ecf4; margin: 16px 0;">
-
-                        <p>
-                            Berfokus pada pengembangan website dengan
-                            struktur yang rapi, desain yang konsisten,
-                            dan pengalaman pengguna yang baik.
-                        </p>
-                    </div>
-                </div>
-
-            </section>
-
-
         </main>
+
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
