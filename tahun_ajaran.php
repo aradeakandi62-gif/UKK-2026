@@ -32,7 +32,7 @@ if (!$query) {
 
     <main class="flex-grow-1 p-4">
 
-        <h2>Data Tahun Ajaran</h2>
+        <h2>Data Tahun ajaran</h2>
         <p class="text-muted">Kelola data tahun ajaran sekolah.</p>
 
         <div class="card">

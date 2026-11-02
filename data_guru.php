@@ -5,12 +5,12 @@ session_start();
 include 'config/koneksi.php';
 include 'includes/cek_session.php';
 
-$current_page = basename($_SERVER['PHP_SELF']);
-
-$query = mysqli_query(
-    $koneksi,
-    "SELECT * FROM t_guru ORDER BY id DESC"
-);
+// Ambil semua data guru
+$query = mysqli_query($koneksi, "
+    SELECT *
+    FROM t_guru
+    ORDER BY id DESC
+");
 
 if (!$query) {
     die("Query gagal: " . mysqli_error($koneksi));
@@ -40,23 +40,29 @@ if (!$query) {
 
 <div class="d-flex">
 
+    <!-- Sidebar -->
     <?php include 'layout/sidebar.php'; ?>
 
-    <div class="flex-grow-1 p-4">
+    <!-- Konten Utama -->
+    <div class="flex-grow-1 p-4" style="min-width: 0;">
 
         <h2>Data Guru</h2>
-        <p class="text-muted">Daftar data guru</p>
+        <p class="text-muted">Daftar data guru sekolah.</p>
 
         <div class="card">
 
+            <!-- Header -->
             <div class="card-header d-flex justify-content-between align-items-center">
+
                 <strong>Data Guru</strong>
 
                 <a href="tambah_guru.php" class="btn btn-primary">
                     + Tambah Guru
                 </a>
+
             </div>
 
+            <!-- Isi Card -->
             <div class="card-body">
 
                 <div class="table-responsive">
@@ -70,48 +76,76 @@ if (!$query) {
                                 <th>NIP</th>
                                 <th>Nama Guru</th>
                                 <th>Email</th>
+                                <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
 
                         <tbody>
+
                         <?php
                         $no = 1;
 
-                        while ($data = mysqli_fetch_assoc($query)):
+                        while ($data = mysqli_fetch_assoc($query)) {
                         ?>
+
                             <tr>
+
+                                <!-- Nomor -->
                                 <td><?= $no++; ?></td>
 
+                                <!-- NIP -->
                                 <td>
                                     <?= htmlspecialchars($data['nip'] ?? ''); ?>
                                 </td>
 
+                                <!-- Nama Guru -->
                                 <td>
                                     <?= htmlspecialchars($data['nama'] ?? ''); ?>
                                 </td>
 
+                                <!-- Email -->
                                 <td>
-                                    <?= htmlspecialchars($data['email'] ?? ''); ?>
+                                    <?= htmlspecialchars($data['email'] ?? '-'); ?>
                                 </td>
 
+                                <!-- Status -->
+                                <td>
+                                    <?php if ((int)$data['status_aktif'] === 1) { ?>
+
+                                        <span class="badge bg-success">
+                                            Aktif
+                                        </span>
+
+                                    <?php } else { ?>
+
+                                        <span class="badge bg-danger">
+                                            Tidak Aktif
+                                        </span>
+
+                                    <?php } ?>
+                                </td>
+
+                                <!-- Aksi -->
                                 <td class="text-nowrap">
 
-                                    <a href="edit_guru.php?id=<?= (int) $data['id']; ?>"
+                                    <a href="edit_guru.php?id=<?= (int)$data['id']; ?>"
                                        class="btn btn-warning btn-sm">
                                         Edit
                                     </a>
 
-                                    <a href="hapus_guru.php?id=<?= (int) $data['id']; ?>"
+                                    <a href="hapus_guru.php?id=<?= (int)$data['id']; ?>"
                                        class="btn btn-danger btn-sm"
                                        onclick="return confirm('Yakin ingin menghapus data guru ini?')">
                                         Hapus
                                     </a>
 
                                 </td>
+
                             </tr>
 
-                        <?php endwhile; ?>
+                        <?php } ?>
+
                         </tbody>
 
                     </table>
@@ -127,14 +161,15 @@ if (!$query) {
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<!-- Bootstrap JavaScript -->
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- DataTables JavaScript -->
+<!-- DataTables JS -->
 <script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
+
 <script src="https://cdn.datatables.net/2.3.2/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- Pengaturan Tabel -->
+<!-- Pengaturan DataTables -->
 <script>
 $(document).ready(function () {
 
@@ -149,24 +184,33 @@ $(document).ready(function () {
         searching: true,
 
         language: {
+
             emptyTable: "Belum ada data guru",
+
             zeroRecords: "Data guru tidak ditemukan",
+
             info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+
             infoEmpty: "Menampilkan 0 data",
+
             infoFiltered: "(difilter dari _MAX_ total data)",
+
             lengthMenu: "Tampilkan _MENU_ data",
+
             search: "Cari:",
+
             paginate: {
                 first: "Pertama",
                 last: "Terakhir",
                 next: "Berikutnya",
                 previous: "Sebelumnya"
             }
+
         },
 
         columnDefs: [
             {
-                targets: [0, 4],
+                targets: [0, 5],
                 orderable: false,
                 searchable: false
             }

@@ -1,140 +1,245 @@
 
 <?php
-// Koneksi database
-include 'config/koneksi.php';
+session_start();
 
-// Ambil data siswa
-$query = mysqli_query($koneksi, "SELECT * FROM t_siswa");
+include 'config/koneksi.php';
+include 'includes/cek_session.php';
+
+// Ambil seluruh data siswa
+$query = mysqli_query($koneksi, "
+    SELECT *
+    FROM t_siswa
+    ORDER BY id DESC
+");
+
+if (!$query) {
+    die("Query gagal: " . mysqli_error($koneksi));
+}
+
+// Mengamankan output
+function e($value) {
+    return htmlspecialchars(
+        (string)($value ?? ''),
+        ENT_QUOTES,
+        'UTF-8'
+    );
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>Data Siswa</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
 
     <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link
+        href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
+        rel="stylesheet">
+
 </head>
 
 <body>
 
 <div class="d-flex">
 
-    <?php
-    include "layout/sidebar.php";
-    ?>
+    <!-- SIDEBAR -->
+    <?php include 'layout/sidebar.php'; ?>
 
-    <!-- Content -->
-    <div class="flex-grow-1 p-4" style="min-width: 0;">
+    <!-- KONTEN UTAMA -->
+    <main class="flex-grow-1 p-4" style="min-width: 0;">
 
         <h2>Data Siswa</h2>
-        <p class="text-muted">Daftar data siswa</p>
+        <p class="text-muted">Daftar data siswa sekolah.</p>
 
-        <div class="card">
+        <div class="card shadow-sm">
 
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <!-- HEADER -->
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+
                 <strong>Data Siswa</strong>
 
                 <a href="tambah_siswa.php" class="btn btn-primary">
                     + Tambah Siswa
                 </a>
+
             </div>
 
+            <!-- BODY -->
             <div class="card-body">
 
                 <div class="table-responsive">
-                    <table id="tabelSiswa" class="table table-bordered table-striped align-middle">
 
+                    <table id="tabelSiswa"
+                           class="table table-bordered table-striped table-hover align-middle w-100">
+
+                        <!-- HEADER TABEL -->
                         <thead class="table-dark">
+
                             <tr>
                                 <th>No</th>
                                 <th>NIS</th>
                                 <th>Nama Siswa</th>
                                 <th>Jenis Kelamin</th>
+                                <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
+
                         </thead>
 
+                        <!-- ISI TABEL -->
                         <tbody>
+
                             <?php
                             $no = 1;
 
                             while ($data = mysqli_fetch_assoc($query)) {
                             ?>
+
                                 <tr>
+
                                     <td><?= $no++; ?></td>
-                                    <td><?= $data['nis']; ?></td>
-                                    <td><?= $data['nama']; ?></td>
-                                    <td><?= $data['jenis_kelamin']; ?></td>
 
                                     <td>
-                                        <a href="edit_siswa.php?id=<?= $data['id']; ?>"
-                                           class="btn btn-warning btn-sm">
+                                        <?= e($data['nis']); ?>
+                                    </td>
+
+                                    <td>
+                                        <?= e($data['nama']); ?>
+                                    </td>
+
+                                    <td>
+                                        <?= e($data['jenis_kelamin']); ?>
+                                    </td>
+
+                                    <!-- STATUS SISWA -->
+                                    <td>
+
+                                        <?php if ((int)$data['status_aktif'] === 1) { ?>
+
+                                            <span class="badge bg-success">
+                                                Aktif
+                                            </span>
+
+                                        <?php } else { ?>
+
+                                            <span class="badge bg-danger">
+                                                Tidak Aktif
+                                            </span>
+
+                                        <?php } ?>
+
+                                    </td>
+
+                                    <!-- AKSI -->
+                                    <td>
+
+                                        <a
+                                            href="edit_siswa.php?id=<?= (int)$data['id']; ?>"
+                                            class="btn btn-warning btn-sm">
+
                                             Edit
+
                                         </a>
 
-                                        <a href="hapus_siswa.php?id=<?= $data['id']; ?>"
-                                           class="btn btn-danger btn-sm"
-                                           onclick="return confirm('Yakin ingin menghapus data ini?')">
+                                        <a
+                                            href="hapus_siswa.php?id=<?= (int)$data['id']; ?>"
+                                            class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Yakin ingin menghapus data siswa ini?')">
+
                                             Hapus
+
                                         </a>
+
                                     </td>
+
                                 </tr>
-                            <?php
-                            }
-                            ?>
+
+                            <?php } ?>
+
                         </tbody>
 
                     </table>
+
                 </div>
 
             </div>
+
         </div>
 
-    </div>
+    </main>
+
 </div>
 
-<!-- jQuery -->
+<!-- JQUERY -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<!-- DataTables JS -->
+<!-- DATATABLES JS -->
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- Pengaturan DataTables -->
+<!-- PENGATURAN DATATABLES -->
 <script>
+
 $(document).ready(function () {
+
     $('#tabelSiswa').DataTable({
+
+        pageLength: 10,
+
+        lengthMenu: [5, 10, 25, 50, 100],
+
+        order: [[1, 'asc']],
+
+        columnDefs: [
+            {
+                orderable: false,
+                targets: [0, 5]
+            }
+        ],
+
         language: {
+
             search: "Cari:",
+
             lengthMenu: "Tampilkan _MENU_ data",
+
             info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            infoEmpty: "Tidak ada data siswa",
-            zeroRecords: "Data tidak ditemukan",
+
+            infoEmpty: "Menampilkan 0 sampai 0 data",
+
+            infoFiltered: "(difilter dari _MAX_ total data)",
+
+            zeroRecords: "Data siswa tidak ditemukan",
+
             emptyTable: "Belum ada data siswa",
+
             paginate: {
                 first: "Pertama",
                 last: "Terakhir",
                 next: "Berikutnya",
                 previous: "Sebelumnya"
             }
-        },
-        pageLength: 10,
-        lengthMenu: [5, 10, 25, 50],
-        columnDefs: [
-            {
-                orderable: false,
-                targets: [0, 4]
-            }
-        ]
+
+        }
+
     });
+
 });
+
 </script>
+
+<!-- BOOTSTRAP JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

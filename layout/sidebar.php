@@ -22,14 +22,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <li class="nav-item mb-2">
             <a href="data_siswa.php"
                class="nav-link <?= ($current_page == 'data_siswa.php') ? 'active' : 'text-white' ?>">
-                Data Siswa
+                Data siswa
             </a>
         </li>
 
         <li class="nav-item mb-2">
             <a href="data_guru.php"
                class="nav-link <?= ($current_page == 'data_guru.php') ? 'active' : 'text-white' ?>">
-                Data Guru
+                Data guru
             </a>
         </li>
 
@@ -50,14 +50,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <li class="nav-item mb-2">
             <a href="penempatan_siswa.php"
                 class="nav-link <?= ($current_page == 'penempatan_siswa.php') ? 'active' : 'text-white' ?>">
-                Penempatan Siswa
+                Penempatan siswa
             </a>
         </li>
 
         <li class="nav-item mb-2">
             <a href="wali_kelas.php"
                 class="nav-link <?= ($current_page == 'wali_kelas.php') ? 'active' : 'text-white' ?>">
-                Wali Kelas
+                Wali kelas
             </a>
         </li>
 
@@ -85,7 +85,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <li class="nav-item mb-2">
             <a href="about_me.php"
                class="nav-link <?= ($current_page == 'about_me.php') ? 'active' : 'text-white' ?>">
-                About Me
+                About me
             </a>
         </li>
 
