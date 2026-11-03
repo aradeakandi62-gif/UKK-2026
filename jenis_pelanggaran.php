@@ -56,9 +56,10 @@ if (!$query) {
 
 <body>
 
-<div class="container-fluid">
+<div class="d-flex">
 
-    <div class="row">
+    <!-- SIDEBAR -->
+    <?php include 'layout/sidebar.php'; ?>
 
         <!-- SIDEBAR -->
         <aside class="col-md-2 bg-dark text-white min-vh-100 p-3">

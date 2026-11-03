@@ -44,7 +44,7 @@ if (!$query) {
     <?php include 'layout/sidebar.php'; ?>
 
     <!-- Konten Utama -->
-    <div class="flex-grow-1 p-4" style="min-width: 0;">
+    <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
         <h2>Data Guru</h2>
         <p class="text-muted">Daftar data guru sekolah.</p>
@@ -134,11 +134,17 @@ if (!$query) {
                                         Edit
                                     </a>
 
-                                    <a href="hapus_guru.php?id=<?= (int)$data['id']; ?>"
-                                       class="btn btn-danger btn-sm"
-                                       onclick="return confirm('Yakin ingin menghapus data guru ini?')">
-                                        Hapus
-                                    </a>
+                                    <form action="hapus_guru.php" method="POST"
+                                            class="d-inline"
+                                            onsubmit="return confirm('Yakin ingin menghapus data guru ini?')">
+
+                                        <input type="hidden" name="id"
+                                                value="<?= (int)$data['id']; ?>">
+
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                             Hapus
+                                        </button>
+                                    </form>
 
                                 </td>
 

@@ -42,8 +42,9 @@ $hobi = "Tidur";
         <!-- SIDEBAR SAMA DENGAN DASHBOARD -->
         <?php include "layout/sidebar.php"; ?>
 
-        <!-- KONTEN PROFIL -->
-        <main class="col-md-9 col-lg-10 p-4">
+       <!-- KONTEN UTAMA -->
+    <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
+
 
             <h2 class="mb-1">Profil Siswa</h2>
             <p class="text-muted mb-4">
@@ -73,7 +74,7 @@ $hobi = "Tidur";
                             <div class="text-center mb-4">
 
                                 <img
-                                    src="jamet.jpg"
+                                    src="riki.jpg"
                                     alt="Foto Profil"
                                     width="140"
                                     height="140"

@@ -1,85 +1,29 @@
 <?php
 session_start();
+
 include 'config/koneksi.php';
 include 'includes/cek_session.php';
 
-$error = '';
-$id = (int) ($_GET['id'] ?? 0);
+$sql = "
+    SELECT
+        ks.id,
+        s.nis,
+        s.nama AS nama_siswa,
+        k.nama AS nama_kelas,
+        ta.nama AS nama_tahun_ajaran
+    FROM t_kelas_siswa ks
+    LEFT JOIN t_siswa s ON ks.siswa_id = s.id
+    LEFT JOIN t_kelas k ON ks.kelas_id = k.id
+    LEFT JOIN t_tahun_ajaran ta ON ks.tahun_ajaran_id = ta.id
+    ORDER BY ks.id DESC
+";
 
-if ($id <= 0) {
-    header('Location: penempatan_siswa.php');
-    exit;
+$query = mysqli_query($koneksi, $sql);
+
+if (!$query) {
+    die('Gagal mengambil data penempatan: ' .
+        htmlspecialchars(mysqli_error($koneksi)));
 }
-
-// Ambil data penempatan
-$stmt = mysqli_prepare($koneksi, "
-    SELECT * FROM t_kelas_siswa WHERE id = ?
-");
-mysqli_stmt_bind_param($stmt, "i", $id);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$data = mysqli_fetch_assoc($result);
-
-if (!$data) {
-    exit('Data penempatan siswa tidak ditemukan.');
-}
-
-// Proses update
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $siswa_id = (int) ($_POST['siswa_id'] ?? 0);
-    $kelas_id = (int) ($_POST['kelas_id'] ?? 0);
-    $tahun_ajaran_id = (int) ($_POST['tahun_ajaran_id'] ?? 0);
-    $tanggal_mulai = $_POST['tanggal_mulai'] ?? '';
-    $tanggal_selesai = $_POST['tanggal_selesai'] ?? '';
-    $status_aktif = (int) ($_POST['status_aktif'] ?? 1);
-
-    if (
-        $siswa_id <= 0 || $kelas_id <= 0 ||
-        $tahun_ajaran_id <= 0 || $tanggal_mulai === ''
-    ) {
-        $error = 'Siswa, kelas, tahun ajaran, dan tanggal mulai wajib diisi.';
-    } elseif (
-        $tanggal_selesai !== '' &&
-        $tanggal_selesai < $tanggal_mulai
-    ) {
-        $error = 'Tanggal selesai tidak boleh sebelum tanggal mulai.';
-    } else {
-        $sql = "UPDATE t_kelas_siswa
-                SET siswa_id = ?,
-                    kelas_id = ?,
-                    tahun_ajaran_id = ?,
-                    tanggal_mulai = ?,
-                    tanggal_selesai = NULLIF(?, ''),
-                    status_aktif = ?,
-                    updated_at = NOW()
-                WHERE id = ?";
-
-        $stmt = mysqli_prepare($koneksi, $sql);
-        mysqli_stmt_bind_param(
-            $stmt,
-            "iiissii",
-            $siswa_id,
-            $kelas_id,
-            $tahun_ajaran_id,
-            $tanggal_mulai,
-            $tanggal_selesai,
-            $status_aktif,
-            $id
-        );
-
-        if (mysqli_stmt_execute($stmt)) {
-            header('Location: penempatan_siswa.php');
-            exit;
-        }
-
-        $error = 'Gagal mengubah data: ' . mysqli_stmt_error($stmt);
-    }
-}
-
-// Ambil pilihan dropdown
-$siswa = mysqli_query($koneksi, "SELECT id, nis, nama FROM t_siswa ORDER BY nama");
-$kelas = mysqli_query($koneksi, "SELECT id, nama FROM t_kelas ORDER BY nama");
-$tahun = mysqli_query($koneksi, "SELECT id, nama FROM t_tahun_ajaran ORDER BY id DESC");
 ?>
 
 <!DOCTYPE html>
@@ -87,97 +31,218 @@ $tahun = mysqli_query($koneksi, "SELECT id, nama FROM t_tahun_ajaran ORDER BY id
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Edit Penempatan Siswa</title>
+
+    <title>Data Penempatan Siswa</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           rel="stylesheet">
 </head>
+
 <body>
+
 <div class="d-flex">
     <?php include 'layout/sidebar.php'; ?>
 
     <main class="flex-grow-1 p-4">
-        <h2>Edit Penempatan Siswa</h2>
 
-        <?php if ($error !== ''): ?>
-            <div class="alert alert-danger">
-                <?= htmlspecialchars($error) ?>
-            </div>
-        <?php endif; ?>
+        <h2>Data Penempatan Siswa</h2>
+        <p class="text-muted">Kelola penempatan siswa berdasarkan kelas dan tahun ajaran.</p>
 
         <div class="card">
+
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Data Penempatan siswa</strong>
+
+                <a href="tambah_penempatan_siswa.php"
+                   class="btn btn-primary">
+                    + Tambah Penempatan
+                </a>
+            </div>
+
             <div class="card-body">
-                <form method="POST">
-                    <div class="mb-3">
-                        <label class="form-label">Nama Siswa</label>
-                        <select name="siswa_id" class="form-select" required>
-                            <option value="">-- Pilih Siswa --</option>
-                            <?php while ($s = mysqli_fetch_assoc($siswa)): ?>
-                                <option value="<?= $s['id'] ?>"
-                                    <?= (int)$s['id'] === (int)$data['siswa_id'] ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($s['nis'] . ' - ' . $s['nama']) ?>
-                                </option>
-                            <?php endwhile; ?>
+
+                <div class="row mb-3">
+                    <div class="col-md-6 d-flex align-items-center gap-2">
+                        <label for="jumlahData">Tampilkan</label>
+
+                        <select id="jumlahData" class="form-select"
+                                style="width: 90px;">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="all">Semua</option>
                         </select>
+
+                        <span>data</span>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Kelas</label>
-                        <select name="kelas_id" class="form-select" required>
-                            <option value="">-- Pilih Kelas --</option>
-                            <?php while ($k = mysqli_fetch_assoc($kelas)): ?>
-                                <option value="<?= $k['id'] ?>"
-                                    <?= (int)$k['id'] === (int)$data['kelas_id'] ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($k['nama']) ?>
-                                </option>
-                            <?php endwhile; ?>
-                        </select>
-                    </div>
+                    <div class="col-md-6 d-flex justify-content-md-end align-items-center gap-2 mt-2 mt-md-0">
+                        <label for="cariData">Cari:</label>
 
-                    <div class="mb-3">
-                        <label class="form-label">Tahun Ajaran</label>
-                        <select name="tahun_ajaran_id" class="form-select" required>
-                            <option value="">-- Pilih Tahun Ajaran --</option>
-                            <?php while ($t = mysqli_fetch_assoc($tahun)): ?>
-                                <option value="<?= $t['id'] ?>"
-                                    <?= (int)$t['id'] === (int)$data['tahun_ajaran_id'] ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($t['nama']) ?>
-                                </option>
-                            <?php endwhile; ?>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Tanggal Mulai</label>
-                        <input type="date" name="tanggal_mulai"
-                               class="form-control" required
-                               value="<?= htmlspecialchars($data['tanggal_mulai']) ?>">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Tanggal Selesai</label>
-                        <input type="date" name="tanggal_selesai"
+                        <input type="text" id="cariData"
                                class="form-control"
-                               value="<?= htmlspecialchars($data['tanggal_selesai'] ?? '') ?>">
+                               placeholder="Cari penempatan siswa..."
+                               style="max-width: 250px;">
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Status</label>
-                        <select name="status_aktif" class="form-select">
-                            <option value="1" <?= (int)$data['status_aktif'] === 1 ? 'selected' : '' ?>>
-                                Aktif
-                            </option>
-                            <option value="0" <?= (int)$data['status_aktif'] === 0 ? 'selected' : '' ?>>
-                                Tidak Aktif
-                            </option>
-                        </select>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover align-middle">
+
+                        <thead class="table-dark">
+                            <tr>
+                                <th>No</th>
+                                <th>NIS</th>
+                                <th>Nama Siswa</th>
+                                <th>Kelas</th>
+                                <th>Tahun Ajaran</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="tabelPenempatan">
+                            <?php
+                            $no = 1;
+
+                            while ($row = mysqli_fetch_assoc($query)):
+                            ?>
+                                <tr>
+                                    <td><?= $no++; ?></td>
+
+                                    <td>
+                                        <?= htmlspecialchars($row['nis'] ?? '-'); ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($row['nama_siswa'] ?? '-'); ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($row['nama_kelas'] ?? '-'); ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($row['nama_tahun_ajaran'] ?? '-'); ?>
+                                    </td>
+
+                                    <td>
+                                        <a href="edit_penempatan_siswa.php?id=<?= $row['id']; ?>"
+                                            class="btn btn-warning btn-sm">
+                                            Edit
+                                        </a>
+
+                                        <form action="hapus_penempatan_siswa.php"
+                                            method="POST"
+                                            class="d-inline"
+                                            onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+
+                                            <input type="hidden" name="id"
+                                                value="<?= $row['id']; ?>">
+
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <small id="infoData" class="text-muted"></small>
+
+                    <div class="btn-group">
+                        <button type="button" id="sebelumnya"
+                                class="btn btn-outline-primary btn-sm">
+                            Sebelumnya
+                        </button>
+
+                        <button type="button" id="berikutnya"
+                                class="btn btn-outline-primary btn-sm">
+                            Berikutnya
+                        </button>
                     </div>
+                </div>
 
-                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                    <a href="penempatan_siswa.php" class="btn btn-secondary">Kembali</a>
-                </form>
             </div>
         </div>
+
     </main>
 </div>
+
+<script>
+const tabel = document.getElementById('tabelPenempatan');
+const jumlahData = document.getElementById('jumlahData');
+const cariData = document.getElementById('cariData');
+const infoData = document.getElementById('infoData');
+const sebelumnya = document.getElementById('sebelumnya');
+const berikutnya = document.getElementById('berikutnya');
+
+let halaman = 1;
+
+function tampilkanData() {
+    const semuaBaris = Array.from(tabel.querySelectorAll('tr'));
+
+    const hasil = semuaBaris.filter(baris =>
+        baris.textContent.toLowerCase()
+            .includes(cariData.value.toLowerCase())
+    );
+
+    const batas = jumlahData.value === 'all'
+        ? Math.max(hasil.length, 1)
+        : parseInt(jumlahData.value, 10);
+
+    const totalHalaman = Math.max(1, Math.ceil(hasil.length / batas));
+
+    halaman = Math.min(Math.max(halaman, 1), totalHalaman);
+
+    semuaBaris.forEach(baris => baris.hidden = true);
+
+    const awal = (halaman - 1) * batas;
+    const akhir = Math.min(awal + batas, hasil.length);
+
+    hasil.forEach((baris, index) => {
+        baris.hidden = index < awal || index >= akhir;
+
+        if (!baris.hidden) {
+            baris.cells[0].textContent = index + 1;
+        }
+    });
+
+    infoData.textContent = hasil.length === 0
+        ? 'Tidak ada data ditemukan.'
+        : `Menampilkan ${awal + 1} sampai ${akhir} dari ${hasil.length} data`;
+
+    sebelumnya.disabled = halaman <= 1;
+    berikutnya.disabled = halaman >= totalHalaman;
+}
+
+jumlahData.addEventListener('change', () => {
+    halaman = 1;
+    tampilkanData();
+});
+
+cariData.addEventListener('input', () => {
+    halaman = 1;
+    tampilkanData();
+});
+
+sebelumnya.addEventListener('click', () => {
+    halaman--;
+    tampilkanData();
+});
+
+berikutnya.addEventListener('click', () => {
+    halaman++;
+    tampilkanData();
+});
+
+tampilkanData();
+</script>
+
 </body>
 </html>

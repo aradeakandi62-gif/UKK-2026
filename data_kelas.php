@@ -46,8 +46,10 @@ while ($row = mysqli_fetch_assoc($query)) {
 
 <body>
 
-<div class="container-fluid">
-    <div class="row">
+<div class="d-flex">
+
+    <!-- SIDEBAR -->
+    <?php include 'layout/sidebar.php'; ?>
 
         <!-- SIDEBAR -->
         <aside class="col-md-2 bg-dark text-white min-vh-100 p-3">
@@ -81,7 +83,7 @@ while ($row = mysqli_fetch_assoc($query)) {
         <main class="col-md-10 p-4">
 
             <h2>Data Kelas</h2>
-
+            
             <p class="text-secondary">
                 Kelola data kelas siswa.
             </p>
@@ -191,20 +193,18 @@ while ($row = mysqli_fetch_assoc($query)) {
                                                         Edit
                                                     </a>
 
-                                                    <form action="hapus_kelas.php"
-                                                          method="POST"
-                                                          onsubmit="return confirm('Yakin ingin menghapus kelas ini?');">
+                                                    
+                                                <form action="hapus_kelas.php" method="POST"
+                                                    onsubmit="return confirm('Yakin ingin menghapus kelas ini?')"
+                                                    class="d-inline">
 
-                                                        <input type="hidden"
-                                                               name="id"
-                                                               value="<?= (int)$row['id']; ?>">
+                                                    <input type="hidden" name="id"
+                                                        value="<?= (int)$data['id']; ?>">
 
-                                                        <button type="submit"
-                                                                class="btn btn-danger btn-sm">
-                                                            Hapus
-                                                        </button>
-
-                                                    </form>
+                                                    <button type="submit" class="btn btn-danger btn-sm">
+                                                        Hapus
+                                                    </button>
+                                                </form>
 
                                                 </div>
                                             </td>

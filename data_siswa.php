@@ -52,10 +52,16 @@ function e($value) {
 <div class="d-flex">
 
     <!-- SIDEBAR -->
-    <?php include 'layout/sidebar.php'; ?>
+    <?php
+if ($_SESSION['role'] == 'guru') {
+    include 'layout/sidebar_guru.php';
+} else {
+    include 'layout/sidebar.php';
+}
+?>
 
     <!-- KONTEN UTAMA -->
-    <main class="flex-grow-1 p-4" style="min-width: 0;">
+    <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
         <h2>Data Siswa</h2>
         <p class="text-muted">Daftar data siswa sekolah.</p>

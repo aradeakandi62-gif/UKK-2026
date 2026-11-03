@@ -55,7 +55,7 @@ if (!$query) {
 
 
         <!-- KONTEN UTAMA -->
-        <main class="col-md-10 p-4">
+        <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
             <h2>Kategori Pelanggaran</h2>
 

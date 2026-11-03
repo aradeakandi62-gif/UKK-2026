@@ -43,7 +43,7 @@ if (!$query) {
 <div class="d-flex">
     <?php include 'layout/sidebar.php'; ?>
 
-    <main class="flex-grow-1 p-4">
+    <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
         <h2>Data Penempatan Siswa</h2>
         <p class="text-muted">Kelola penempatan siswa berdasarkan kelas dan tahun ajaran.</p>
@@ -127,16 +127,23 @@ if (!$query) {
                                     </td>
 
                                     <td>
-                                        <a href="edit_penempatan_siswa.php?id=<?= (int)$row['id']; ?>"
-                                           class="btn btn-warning btn-sm">
+                                        <a href="edit_penempatan_siswa.php?id=<?= $row['id']; ?>"
+                                            class="btn btn-warning btn-sm">
                                             Edit
                                         </a>
 
-                                        <a href="hapus_penempatan_siswa.php?id=<?= (int)$row['id']; ?>"
-                                           class="btn btn-danger btn-sm"
-                                           onclick="return confirm('Yakin ingin menghapus penempatan siswa ini?')">
-                                            Hapus
-                                        </a>
+                                        <form action="hapus_penempatan_siswa.php"
+                                            method="POST"
+                                            class="d-inline"
+                                            onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+
+                                            <input type="hidden" name="id"
+                                                value="<?= $row['id']; ?>">
+
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                Hapus
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>

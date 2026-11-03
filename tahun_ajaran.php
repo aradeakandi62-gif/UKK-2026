@@ -30,7 +30,7 @@ if (!$query) {
 <div class="d-flex">
     <?php include 'layout/sidebar.php'; ?>
 
-    <main class="flex-grow-1 p-4">
+    <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
         <h2>Data Tahun ajaran</h2>
         <p class="text-muted">Kelola data tahun ajaran sekolah.</p>

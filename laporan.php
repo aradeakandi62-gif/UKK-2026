@@ -50,9 +50,15 @@ $totalPelanggaran = hitungData($koneksi, 't_pelanggaran');
 <body>
 
 <div class="d-flex">
-    <?php include 'layout/sidebar.php'; ?>
+    <?php
+if ($_SESSION['role'] == 'guru') {
+    include 'layout/sidebar_guru.php';
+} else {
+    include 'layout/sidebar.php';
+}
+?>
 
-    <main class="flex-grow-1 p-4">
+    <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
         <h2>Laporan</h2>
         <p class="text-muted">
