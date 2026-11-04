@@ -46,106 +46,48 @@ if (!$query) {
 
     <title>Data Jenis Pelanggaran</title>
 
-    <!-- Bootstrap 5 -->
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+    <!-- BOOTSTRAP 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <!-- DATATABLES BOOTSTRAP 5 -->
+    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
+          rel="stylesheet">
 
 </head>
 
 <body>
 
-<div class="d-flex">
+<div class="container-fluid">
 
-    <!-- SIDEBAR -->
-    <?php include 'layout/sidebar.php'; ?>
+    <div class="row">
 
         <!-- SIDEBAR -->
-        <aside class="col-md-2 bg-dark text-white min-vh-100 p-3">
-
-            <h4 class="mb-4">My Website</h4>
-
-            <nav class="nav nav-pills flex-column gap-2">
-
-                <a href="dashboard.php" class="nav-link text-white">
-                    Dashboard
-                </a>
-
-                <a href="data_siswa.php" class="nav-link text-white">
-                    Data siswa
-                </a>
-
-                <a href="data_guru.php" class="nav-link text-white">
-                    Data guru
-                </a>
-
-                <a href="data_kelas.php" class="nav-link text-white">
-                    Kelas
-                </a>
-
-                <a href="tahun_ajaran.php" class="nav-link text-white">
-                    Tahun ajaran
-                </a>
-
-                <a href="penempatan_siswa.php" class="nav-link text-white">
-                    Penempatan siswa
-                </a>
-
-                <a href="wali_kelas.php" class="nav-link text-white">
-                    Wali kelas
-                </a>
-
-                <a href="kategori_pelanggaran.php"
-                   class="nav-link text-white">
-                    Kategori pelanggaran
-                </a>
-
-                <a href="jenis_pelanggaran.php"
-                   class="nav-link active"
-                   aria-current="page">
-                    Jenis pelanggaran
-                </a>
-
-                <a href="laporan.php" class="nav-link text-white">
-                    Laporan
-                </a>
-
-                <a href="about_me.php" class="nav-link text-white">
-                    About me
-                </a>
-
-                <hr>
-
-                <a href="logout.php" class="nav-link text-danger">
-                    Logout
-                </a>
-
-            </nav>
-
-        </aside>
+        <?php include 'layout/sidebar.php'; ?>
 
 
         <!-- KONTEN UTAMA -->
-        <main class="col-md-10 p-4">
+        <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
-            <h2>Jenis Pelanggaran</h2>
+            <h2 class="mb-1">Jenis Pelanggaran</h2>
 
-            <p class="text-secondary">
+            <p class="text-secondary mb-4">
                 Kelola data jenis pelanggaran siswa.
             </p>
 
 
             <!-- CARD DATA -->
-            <div class="card border mb-3">
+            <div class="card shadow-sm">
 
                 <!-- HEADER -->
-                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
 
-                    <strong>Data Jenis Pelanggaran</strong>
+                    <h5 class="mb-0">
+                        Data Jenis Pelanggaran
+                    </h5>
 
                     <a href="tambah_jenis_pelanggaran.php"
-                       class="btn btn-primary">
+                       class="btn btn-primary btn-sm">
 
                         + Tambah Jenis Pelanggaran
 
@@ -154,66 +96,33 @@ if (!$query) {
                 </div>
 
 
+                <!-- BODY CARD -->
                 <div class="card-body">
 
-
-                    <!-- PENCARIAN DAN JUMLAH DATA -->
-                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-
-                        <div>
-
-                            Tampilkan
-
-                            <select id="jumlahData"
-                                    class="form-select d-inline-block w-auto">
-
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-
-                            </select>
-
-                            data
-
-                        </div>
-
-
-                        <div class="d-flex align-items-center gap-2">
-
-                            <label for="cariData">Cari:</label>
-
-                            <input
-                                type="text"
-                                id="cariData"
-                                class="form-control"
-                                placeholder="Cari jenis pelanggaran..."
-                            >
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- TABEL -->
                     <div class="table-responsive">
 
-                        <table
-                            class="table table-bordered table-striped table-hover align-middle"
-                            id="tabelPelanggaran"
-                        >
+                        <table id="tabelPelanggaran"
+                               class="table table-bordered table-striped table-hover align-middle w-100">
 
+                            <!-- HEADER TABEL -->
                             <thead class="table-dark">
 
                                 <tr>
 
                                     <th>No</th>
+
                                     <th>Kode</th>
+
                                     <th>Nama Pelanggaran</th>
+
                                     <th>Kategori</th>
+
                                     <th>Poin</th>
+
                                     <th>Deskripsi</th>
+
                                     <th>Status</th>
+
                                     <th>Aksi</th>
 
                                 </tr>
@@ -221,127 +130,120 @@ if (!$query) {
                             </thead>
 
 
+                            <!-- ISI TABEL -->
                             <tbody>
 
                                 <?php
+
                                 $no = 1;
 
-                                if (mysqli_num_rows($query) > 0):
+                                while ($row = mysqli_fetch_assoc($query)):
 
-                                    while ($row = mysqli_fetch_assoc($query)):
                                 ?>
 
-                                    <tr>
+                                <tr>
 
-                                        <td><?= $no++; ?></td>
-
-
-                                        <td>
-                                            <?= e($row['kode']); ?>
-                                        </td>
+                                    <!-- NOMOR -->
+                                    <td>
+                                        <?= $no++; ?>
+                                    </td>
 
 
-                                        <td>
-                                            <?= e($row['nama']); ?>
-                                        </td>
+                                    <!-- KODE -->
+                                    <td>
+                                        <?= e($row['kode']); ?>
+                                    </td>
 
 
-                                        <td>
-                                            <?= e($row['nama_kategori'] ?? '-'); ?>
-                                        </td>
+                                    <!-- NAMA PELANGGARAN -->
+                                    <td>
+                                        <?= e($row['nama']); ?>
+                                    </td>
 
 
-                                        <td>
+                                    <!-- KATEGORI -->
+                                    <td>
+                                        <?= e($row['nama_kategori'] ?? '-'); ?>
+                                    </td>
 
-                                            <span class="badge bg-info text-dark">
 
-                                                <?= (int)$row['poin']; ?> poin
+                                    <!-- POIN -->
+                                    <td>
 
+                                        <span class="badge bg-info text-dark">
+
+                                            <?= (int)$row['poin']; ?> poin
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- DESKRIPSI -->
+                                    <td>
+                                        <?= e($row['deskripsi'] ?: '-'); ?>
+                                    </td>
+
+
+                                    <!-- STATUS -->
+                                    <td>
+
+                                        <?php if ((int)$row['status_aktif'] === 1): ?>
+
+                                            <span class="badge bg-success">
+                                                Aktif
                                             </span>
 
-                                        </td>
+                                        <?php else: ?>
+
+                                            <span class="badge bg-secondary">
+                                                Tidak Aktif
+                                            </span>
+
+                                        <?php endif; ?>
+
+                                    </td>
 
 
-                                        <td>
-                                            <?= e($row['deskripsi'] ?: '-'); ?>
-                                        </td>
+                                    <!-- AKSI -->
+                                    <td>
+
+                                        <div class="d-flex gap-2">
+
+                                            <!-- EDIT -->
+                                            <a href="edit_jenis_pelanggaran.php?id=<?= (int)$row['id']; ?>"
+                                               class="btn btn-warning btn-sm">
+
+                                                Edit
+
+                                            </a>
 
 
-                                        <td>
+                                            <!-- HAPUS -->
+                                            <form action="hapus_jenis_pelanggaran.php"
+                                                  method="POST"
+                                                  onsubmit="return confirm('Yakin ingin menghapus jenis pelanggaran ini?');">
 
-                                            <?php if ((int)$row['status_aktif'] === 1): ?>
+                                                <input type="hidden"
+                                                       name="id"
+                                                       value="<?= (int)$row['id']; ?>">
 
-                                                <span class="badge bg-success">
-                                                    Aktif
-                                                </span>
+                                                <button type="submit"
+                                                        class="btn btn-danger btn-sm">
 
-                                            <?php else: ?>
+                                                    Hapus
 
-                                                <span class="badge bg-secondary">
-                                                    Tidak Aktif
-                                                </span>
+                                                </button>
 
-                                            <?php endif; ?>
+                                            </form>
 
-                                        </td>
+                                        </div>
 
+                                    </td>
 
-                                        <td>
+                                </tr>
 
-                                            <div class="d-flex gap-1">
-
-                                                <!-- EDIT -->
-                                                <a
-                                                    href="edit_jenis_pelanggaran.php?id=<?= (int)$row['id']; ?>"
-                                                    class="btn btn-warning btn-sm"
-                                                >
-                                                    Edit
-                                                </a>
-
-
-                                                <!-- HAPUS -->
-                                                <form
-                                                    action="hapus_jenis_pelanggaran.php"
-                                                    method="POST"
-                                                    onsubmit="return confirm('Yakin ingin menghapus jenis pelanggaran ini?');"
-                                                >
-
-                                                    <input
-                                                        type="hidden"
-                                                        name="id"
-                                                        value="<?= (int)$row['id']; ?>"
-                                                    >
-
-                                                    <button
-                                                        type="submit"
-                                                        class="btn btn-danger btn-sm"
-                                                    >
-                                                        Hapus
-                                                    </button>
-
-                                                </form>
-
-                                            </div>
-
-                                        </td>
-
-                                    </tr>
-
-                                <?php
-                                    endwhile;
-
-                                else:
-                                ?>
-
-                                    <tr>
-                                        <td colspan="8" class="text-center py-4">
-
-                                            Belum ada data jenis pelanggaran.
-
-                                        </td>
-                                    </tr>
-
-                                <?php endif; ?>
+                                <?php endwhile; ?>
 
                             </tbody>
 
@@ -349,43 +251,9 @@ if (!$query) {
 
                     </div>
 
-
-                    <!-- INFORMASI DATA DAN PAGINATION -->
-                    <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
-
-                        <div id="infoData">
-                            Menampilkan data
-                        </div>
-
-
-                        <div>
-
-                            <button
-                                type="button"
-                                class="btn btn-outline-primary btn-sm"
-                                id="sebelumnya"
-                            >
-                                Sebelumnya
-                            </button>
-
-
-                            <button
-                                type="button"
-                                class="btn btn-outline-primary btn-sm"
-                                id="berikutnya"
-                            >
-                                Berikutnya
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
                 </div>
 
             </div>
-
 
         </main>
 
@@ -395,155 +263,92 @@ if (!$query) {
 
 
 <!-- BOOTSTRAP JAVASCRIPT -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 
-<!-- JAVASCRIPT TABEL -->
+<!-- JQUERY -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+
+<!-- DATATABLES -->
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+
+
+<!-- DATATABLES BOOTSTRAP 5 -->
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
+
+
+<!-- KONFIGURASI DATATABLES -->
 <script>
 
-document.addEventListener("DOMContentLoaded", function () {
+$(document).ready(function () {
 
-    const tabel = document.getElementById("tabelPelanggaran");
-    const jumlahData = document.getElementById("jumlahData");
-    const cariData = document.getElementById("cariData");
-    const infoData = document.getElementById("infoData");
+    $('#tabelPelanggaran').DataTable({
 
-    const sebelumnya = document.getElementById("sebelumnya");
-    const berikutnya = document.getElementById("berikutnya");
+        // Jumlah data awal
+        pageLength: 10,
 
-    const tbody = tabel.querySelector("tbody");
+        // Pilihan jumlah data
+        lengthMenu: [5, 10, 25, 50, 100],
 
-    // Mengambil semua baris data
-    const semuaBaris = Array.from(
-        tbody.querySelectorAll("tr")
-    ).filter(row => row.cells.length === 8);
+        // Mengaktifkan sortir
+        ordering: true,
 
-    let dataFilter = [...semuaBaris];
+        // Mengaktifkan pencarian
+        searching: true,
 
-    let halaman = 1;
-
-
-    // FUNGSI MENAMPILKAN DATA
-    function tampilkanData() {
-
-        const perHalaman = parseInt(jumlahData.value);
-
-        const totalData = dataFilter.length;
-
-        const totalHalaman = Math.ceil(
-            totalData / perHalaman
-        );
-
-        // Memastikan halaman tetap valid
-        if (halaman > totalHalaman) {
-
-            halaman = Math.max(1, totalHalaman);
-
-        }
-
-
-        // Sembunyikan semua baris
-        semuaBaris.forEach(row => {
-
-            row.hidden = true;
-
-        });
-
-
-        // Menghitung batas data
-        const awal = (halaman - 1) * perHalaman;
-
-        const akhir = awal + perHalaman;
-
-
-        // Menampilkan data sesuai pilihan
-        dataFilter.slice(awal, akhir).forEach(row => {
-
-            row.hidden = false;
-
-        });
-
+        // Mengaktifkan pagination
+        paging: true,
 
         // Informasi jumlah data
-        const dari = totalData === 0 ? 0 : awal + 1;
+        info: true,
 
-        const sampai = Math.min(akhir, totalData);
+        // Bahasa Indonesia
+        language: {
 
+            emptyTable: "Belum ada data jenis pelanggaran",
 
-        infoData.textContent =
-            `Menampilkan ${dari} sampai ${sampai} dari ${totalData} data`;
+            zeroRecords: "Data jenis pelanggaran tidak ditemukan",
 
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
 
-        // Tombol pagination
-        sebelumnya.disabled = halaman <= 1;
+            infoEmpty: "Menampilkan 0 data",
 
-        berikutnya.disabled = halaman >= totalHalaman;
+            infoFiltered: "(difilter dari _MAX_ total data)",
 
-    }
+            lengthMenu: "Tampilkan _MENU_ data",
 
+            search: "Cari:",
 
-    // DROPDOWN JUMLAH DATA
-    jumlahData.addEventListener("change", function () {
+            paginate: {
 
-        halaman = 1;
+                first: "Pertama",
 
-        tampilkanData();
+                last: "Terakhir",
 
-    });
+                next: "Berikutnya",
 
+                previous: "Sebelumnya"
 
-    // PENCARIAN DATA
-    cariData.addEventListener("input", function () {
+            }
 
-        const keyword = this.value.toLowerCase();
+        },
 
-        dataFilter = semuaBaris.filter(row => {
+        // Pengaturan kolom
+        columnDefs: [
 
-            return row.textContent.toLowerCase().includes(keyword);
+            {
+                targets: [0, 7],
+                orderable: false,
+                searchable: false
+            }
 
-        });
+        ],
 
-        halaman = 1;
-
-        tampilkanData();
-
-    });
-
-
-    // TOMBOL SEBELUMNYA
-    sebelumnya.addEventListener("click", function () {
-
-        if (halaman > 1) {
-
-            halaman--;
-
-            tampilkanData();
-
-        }
+        // Urutkan berdasarkan nama pelanggaran
+        order: [[2, 'asc']]
 
     });
-
-
-    // TOMBOL BERIKUTNYA
-    berikutnya.addEventListener("click", function () {
-
-        const totalHalaman = Math.ceil(
-            dataFilter.length / parseInt(jumlahData.value)
-        );
-
-        if (halaman < totalHalaman) {
-
-            halaman++;
-
-            tampilkanData();
-
-        }
-
-    });
-
-
-    // TAMPILKAN DATA PERTAMA KALI
-    tampilkanData();
 
 });
 

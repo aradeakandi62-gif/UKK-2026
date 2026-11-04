@@ -47,7 +47,7 @@ if (!$query) {
     <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
         <h2>Data Guru</h2>
-        <p class="text-muted">Daftar data guru sekolah.</p>
+        <p class="text-muted">kelola data guru.</p>
 
         <div class="card">
 
@@ -67,8 +67,7 @@ if (!$query) {
 
                 <div class="table-responsive">
 
-                    <table id="tabelGuru"
-                           class="table table-bordered table-striped table-hover align-middle w-100">
+                    <table id="tabelGuru" class="table table-bordered table-striped table-hover align-middle w-100">
 
                         <thead class="table-dark">
                             <tr>

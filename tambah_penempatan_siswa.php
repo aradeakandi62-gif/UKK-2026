@@ -113,11 +113,17 @@ $error = '';
                         </select>
                     </div>
 
-                    <a href="penempatan_siswa.php"
-                       class="btn btn-secondary">Kembali</a>
-                    <button type="submit" class="btn btn-primary">
-                        Simpan Penempatan
-                    </button>
+                    <button
+                            type="submit"
+                            class="btn btn-primary">
+                            Simpan
+                        </button>
+
+                        <a
+                            href="penempatan_siswa.php"
+                            class="btn btn-secondary">
+                            Kembali
+                        </a>
                 </form>
                 <?php endif; ?>
             </div>

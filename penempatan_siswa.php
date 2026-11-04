@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 
@@ -28,220 +29,282 @@ if (!$query) {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>Data Penempatan Siswa</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    <!-- BOOTSTRAP 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
           rel="stylesheet">
+
+    <!-- DATATABLES BOOTSTRAP 5 -->
+    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
+          rel="stylesheet">
+
 </head>
 
 <body>
 
-<div class="d-flex">
-    <?php include 'layout/sidebar.php'; ?>
+<div class="container-fluid">
 
-    <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
+    <div class="row">
 
-        <h2>Data Penempatan Siswa</h2>
-        <p class="text-muted">Kelola penempatan siswa berdasarkan kelas dan tahun ajaran.</p>
+        <!-- SIDEBAR -->
+        <?php include 'layout/sidebar.php'; ?>
 
-        <div class="card">
 
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Data Penempatan siswa</strong>
+        <!-- KONTEN UTAMA -->
+        <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
-                <a href="tambah_penempatan_siswa.php"
-                   class="btn btn-primary">
-                    + Tambah Penempatan
-                </a>
-            </div>
+            <h2 class="mb-1">Data Penempatan Siswa</h2>
 
-            <div class="card-body">
+            <p class="text-muted mb-4">
+                Kelola penempatan siswa berdasarkan kelas dan tahun ajaran.
+            </p>
 
-                <div class="row mb-3">
-                    <div class="col-md-6 d-flex align-items-center gap-2">
-                        <label for="jumlahData">Tampilkan</label>
 
-                        <select id="jumlahData" class="form-select"
-                                style="width: 90px;">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="all">Semua</option>
-                        </select>
+            <!-- CARD TABEL -->
+            <div class="card">
 
-                        <span>data</span>
-                    </div>
+                <!-- HEADER CARD -->
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
 
-                    <div class="col-md-6 d-flex justify-content-md-end align-items-center gap-2 mt-2 mt-md-0">
-                        <label for="cariData">Cari:</label>
+                    <h5 class="mb-0">
+                        Data Penempatan Siswa
+                    </h5>
 
-                        <input type="text" id="cariData"
-                               class="form-control"
-                               placeholder="Cari penempatan siswa..."
-                               style="max-width: 250px;">
-                    </div>
+                    <a href="tambah_penempatan_siswa.php"
+                       class="btn btn-primary btn-sm">
+
+                        + Tambah Penempatan
+
+                    </a>
+
                 </div>
 
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-hover align-middle">
 
-                        <thead class="table-dark">
-                            <tr>
-                                <th>No</th>
-                                <th>NIS</th>
-                                <th>Nama Siswa</th>
-                                <th>Kelas</th>
-                                <th>Tahun Ajaran</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
+                <!-- BODY CARD -->
+                <div class="card-body">
 
-                        <tbody id="tabelPenempatan">
-                            <?php
-                            $no = 1;
+                    <div class="table-responsive">
 
-                            while ($row = mysqli_fetch_assoc($query)):
-                            ?>
+                        <table id="tabelPenempatan"
+                               class="table table-bordered table-striped table-hover align-middle w-100">
+
+                            <!-- HEADER TABEL -->
+                            <thead class="table-dark">
+
                                 <tr>
-                                    <td><?= $no++; ?></td>
+
+                                    <th>No</th>
+
+                                    <th>NIS</th>
+
+                                    <th>Nama Siswa</th>
+
+                                    <th>Kelas</th>
+
+                                    <th>Tahun Ajaran</th>
+
+                                    <th>Aksi</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <!-- ISI TABEL -->
+                            <tbody>
+
+                                <?php
+
+                                $no = 1;
+
+                                if (mysqli_num_rows($query) > 0) {
+
+                                    while ($row = mysqli_fetch_assoc($query)) {
+
+                                ?>
+
+                                <tr>
+
+                                    <td>
+                                        <?= $no++; ?>
+                                    </td>
+
 
                                     <td>
                                         <?= htmlspecialchars($row['nis'] ?? '-'); ?>
                                     </td>
 
+
                                     <td>
                                         <?= htmlspecialchars($row['nama_siswa'] ?? '-'); ?>
                                     </td>
+
 
                                     <td>
                                         <?= htmlspecialchars($row['nama_kelas'] ?? '-'); ?>
                                     </td>
 
+
                                     <td>
                                         <?= htmlspecialchars($row['nama_tahun_ajaran'] ?? '-'); ?>
                                     </td>
 
-                                    <td>
-                                        <a href="edit_penempatan_siswa.php?id=<?= $row['id']; ?>"
-                                            class="btn btn-warning btn-sm">
-                                            Edit
-                                        </a>
 
-                                        <form action="hapus_penempatan_siswa.php"
+                                    <td>
+
+                                        <div class="d-flex gap-2">
+
+                                            <!-- EDIT -->
+                                            <a href="edit_penempatan.php?id=<?= (int)$row['id']; ?>"
+                                                class="btn btn-warning btn-sm">
+                                                 Edit
+                                            </a>
+
+
+                                            <!-- HAPUS -->             
+                                        <form action="hapus_penempatan.php"
                                             method="POST"
                                             class="d-inline"
                                             onsubmit="return confirm('Yakin ingin menghapus data ini?')">
 
                                             <input type="hidden" name="id"
-                                                value="<?= $row['id']; ?>">
+                                                value="<?= (int)$row['id']; ?>">
 
                                             <button type="submit" class="btn btn-danger btn-sm">
                                                 Hapus
                                             </button>
                                         </form>
+
+
+
+                                        </div>
+
                                     </td>
+
                                 </tr>
-                            <?php endwhile; ?>
-                        </tbody>
 
-                    </table>
-                </div>
+                                <?php
 
-                <div class="d-flex justify-content-between align-items-center">
-                    <small id="infoData" class="text-muted"></small>
+                                    }
 
-                    <div class="btn-group">
-                        <button type="button" id="sebelumnya"
-                                class="btn btn-outline-primary btn-sm">
-                            Sebelumnya
-                        </button>
+                                }
 
-                        <button type="button" id="berikutnya"
-                                class="btn btn-outline-primary btn-sm">
-                            Berikutnya
-                        </button>
+                                ?>
+
+                            </tbody>
+
+                        </table>
+
                     </div>
+
                 </div>
 
             </div>
-        </div>
 
-    </main>
+        </main>
+
+    </div>
+
 </div>
 
+
+<!-- BOOTSTRAP JAVASCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<!-- JQUERY -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+
+<!-- DATATABLES -->
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+
+
+<!-- DATATABLES BOOTSTRAP 5 -->
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
+
+
+<!-- KONFIGURASI DATATABLES -->
 <script>
-const tabel = document.getElementById('tabelPenempatan');
-const jumlahData = document.getElementById('jumlahData');
-const cariData = document.getElementById('cariData');
-const infoData = document.getElementById('infoData');
-const sebelumnya = document.getElementById('sebelumnya');
-const berikutnya = document.getElementById('berikutnya');
 
-let halaman = 1;
+$(document).ready(function () {
 
-function tampilkanData() {
-    const semuaBaris = Array.from(tabel.querySelectorAll('tr'));
+    $('#tabelPenempatan').DataTable({
 
-    const hasil = semuaBaris.filter(baris =>
-        baris.textContent.toLowerCase()
-            .includes(cariData.value.toLowerCase())
-    );
+        // Jumlah data awal
+        pageLength: 10,
 
-    const batas = jumlahData.value === 'all'
-        ? Math.max(hasil.length, 1)
-        : parseInt(jumlahData.value, 10);
+        // Pilihan jumlah data
+        lengthMenu: [5, 10, 25, 50, 100],
 
-    const totalHalaman = Math.max(1, Math.ceil(hasil.length / batas));
+        // Mengaktifkan sortir
+        ordering: true,
 
-    halaman = Math.min(Math.max(halaman, 1), totalHalaman);
+        // Mengaktifkan pencarian
+        searching: true,
 
-    semuaBaris.forEach(baris => baris.hidden = true);
+        // Mengaktifkan pagination
+        paging: true,
 
-    const awal = (halaman - 1) * batas;
-    const akhir = Math.min(awal + batas, hasil.length);
+        // Informasi jumlah data
+        info: true,
 
-    hasil.forEach((baris, index) => {
-        baris.hidden = index < awal || index >= akhir;
+        // Bahasa Indonesia
+        language: {
 
-        if (!baris.hidden) {
-            baris.cells[0].textContent = index + 1;
-        }
+            emptyTable: "Belum ada data penempatan siswa",
+
+            zeroRecords: "Data penempatan siswa tidak ditemukan",
+
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+
+            infoEmpty: "Menampilkan 0 data",
+
+            infoFiltered: "(difilter dari _MAX_ total data)",
+
+            lengthMenu: "Tampilkan _MENU_ data",
+
+            search: "Cari:",
+
+            paginate: {
+
+                first: "Pertama",
+
+                last: "Terakhir",
+
+                next: "Berikutnya",
+
+                previous: "Sebelumnya"
+
+            }
+
+        },
+
+        // Pengaturan kolom
+        columnDefs: [
+
+            {
+                targets: [0, 5],
+                orderable: false,
+                searchable: false
+            }
+
+        ],
+
+        // Urutkan berdasarkan NIS
+        order: [[1, 'asc']]
+
     });
 
-    infoData.textContent = hasil.length === 0
-        ? 'Tidak ada data ditemukan.'
-        : `Menampilkan ${awal + 1} sampai ${akhir} dari ${hasil.length} data`;
-
-    sebelumnya.disabled = halaman <= 1;
-    berikutnya.disabled = halaman >= totalHalaman;
-}
-
-jumlahData.addEventListener('change', () => {
-    halaman = 1;
-    tampilkanData();
 });
 
-cariData.addEventListener('input', () => {
-    halaman = 1;
-    tampilkanData();
-});
-
-sebelumnya.addEventListener('click', () => {
-    halaman--;
-    tampilkanData();
-});
-
-berikutnya.addEventListener('click', () => {
-    halaman++;
-    tampilkanData();
-});
-
-tampilkanData();
 </script>
 
 </body>

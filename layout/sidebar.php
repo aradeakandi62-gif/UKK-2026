@@ -96,6 +96,13 @@ $dashboard = ($role === 'guru') ? 'dashboard_guru.php' : 'dashboard.php';
                 </a>
             </li>
 
+            <li class="nav-item mb-2">
+                <a href="about.php"
+                   class="nav-link <?= ($current_page == 'about.php') ? 'active' : 'text-white' ?>">
+                    About Me
+                </a>
+            </li>
+            
         <?php elseif ($role === 'guru'): ?>
 
             <!-- MENU KHUSUS GURU -->

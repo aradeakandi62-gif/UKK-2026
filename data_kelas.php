@@ -1,9 +1,13 @@
+
 <?php
+// kelola_kelas.php
+
 session_start();
 
-include 'config/koneksi.php';
 include 'includes/cek_session.php';
+include 'config/koneksi.php';
 
+// Fungsi keamanan output
 function e($value) {
     return htmlspecialchars(
         (string)($value ?? ''),
@@ -12,134 +16,98 @@ function e($value) {
     );
 }
 
-// Ambil data kelas
-$sql = "SELECT *
-        FROM t_kelas
-        ORDER BY id DESC";
+// Mengambil data kelas
+$sql = "SELECT * FROM t_kelas ORDER BY id DESC";
+$hasil = mysqli_query($koneksi, $sql);
 
-$query = mysqli_query($koneksi, $sql);
-
-if (!$query) {
+if (!$hasil) {
     die('Query gagal: ' . e(mysqli_error($koneksi)));
-}
-
-$data_kelas = [];
-
-while ($row = mysqli_fetch_assoc($query)) {
-    $data_kelas[] = $row;
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Data Kelas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Bootstrap -->
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+    <title>Kelola Kelas</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <!-- DataTables Bootstrap 5 -->
+    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
+          rel="stylesheet">
+
 </head>
 
 <body>
 
-<div class="d-flex">
-
-    <!-- SIDEBAR -->
-    <?php include 'layout/sidebar.php'; ?>
+<div class="container-fluid">
+    <div class="row">
 
         <!-- SIDEBAR -->
-        <aside class="col-md-2 bg-dark text-white min-vh-100 p-3">
+        <?php include 'layout/sidebar.php'; ?>
 
-            <h4 class="mb-4">My Website</h4>
+        <!-- Konten Utama -->
+    <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
-            <nav class="nav nav-pills flex-column gap-2">
-                <a href="dashboard.php" class="nav-link text-white">Dashboard</a>
-                <a href="data_siswa.php" class="nav-link text-white">Data siswa</a>
-                <a href="data_guru.php" class="nav-link text-white">Data guru</a>
 
-                <a href="data_kelas.php" class="nav-link active"
-                   aria-current="page">Kelas</a>
+            <h2 class="mb-1">Data Kelas</h2>
 
-                <a href="tahun_ajaran.php" class="nav-link text-white">Tahun ajaran</a>
-                <a href="penempatan_siswa.php" class="nav-link text-white">Penempatan siswa</a>
-                <a href="wali_kelas.php" class="nav-link text-white">Wali Kelas</a>
-                <a href="kategori_pelanggaran.php" class="nav-link text-white">Kategori pelanggaran</a>
-                <a href="jenis_pelanggaran.php" class="nav-link text-white">Jenis pelanggaran</a>
-                <a href="laporan.php" class="nav-link text-white">Laporan</a>
-                <a href="about_me.php" class="nav-link text-white">About Me</a>
-
-                <hr>
-
-                <a href="logout.php" class="nav-link text-danger">Logout</a>
-            </nav>
-
-        </aside>
-
-        <!-- KONTEN -->
-        <main class="col-md-10 p-4">
-
-            <h2>Data Kelas</h2>
-            
-            <p class="text-secondary">
+            <p class="text-secondary mb-4">
                 Kelola data kelas siswa.
             </p>
 
+            <!-- NOTIFIKASI -->
+            <?php
+            if (isset($_SESSION['pesan_sukses'])) {
+                echo '<div class="alert alert-success alert-dismissible fade show" role="alert">';
+                echo htmlspecialchars($_SESSION['pesan_sukses']);
+                echo '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                echo '</div>';
+
+                unset($_SESSION['pesan_sukses']);
+            }
+
+            if (isset($_SESSION['pesan_error'])) {
+                echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
+                echo htmlspecialchars($_SESSION['pesan_error']);
+                echo '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                echo '</div>';
+
+                unset($_SESSION['pesan_error']);
+            }
+            ?>
+
+            <!-- TABEL KELAS -->
             <div class="card">
 
                 <!-- HEADER -->
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <strong>Data Kelas</strong>
 
-                    <a href="tambah_kelas.php" class="btn btn-primary">
+                    <h5 class="mb-0">
+                        Data Kelas
+                    </h5>
+
+                    <a href="tambah_kelas.php" class="btn btn-primary btn-sm">
                         + Tambah Kelas
                     </a>
+
                 </div>
 
                 <div class="card-body">
 
-                    <!-- PENCARIAN DAN JUMLAH DATA -->
-                    <div class="row mb-3 align-items-center">
-
-                        <div class="col-md-6">
-                            <label for="jumlahData" class="form-label">
-                                Tampilkan
-                            </label>
-
-                            <select id="jumlahData"
-                                    class="form-select d-inline-block w-auto">
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                                <option value="all">Semua</option>
-                            </select>
-
-                            <span class="ms-2">data</span>
-                        </div>
-
-                        <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                            <label for="cariData" class="form-label">
-                                Cari:
-                            </label>
-
-                            <input type="search"
-                                   id="cariData"
-                                   class="form-control d-inline-block w-auto"
-                                   placeholder="Cari data kelas...">
-                        </div>
-
-                    </div>
-
-                    <!-- TABEL -->
                     <div class="table-responsive">
 
-                        <table class="table table-bordered table-striped table-hover align-middle">
+                        <table id="tabelkelas"
+                               class="table table-bordered table-striped table-hover align-middle w-100">
 
                             <thead class="table-dark">
+
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Kelas</th>
@@ -148,89 +116,110 @@ while ($row = mysqli_fetch_assoc($query)) {
                                     <th>Status</th>
                                     <th>Aksi</th>
                                 </tr>
+
                             </thead>
 
-                            <tbody id="tabelKelas">
+                            <tbody>
 
-                                <?php if (count($data_kelas) > 0): ?>
+                                <?php
+                                $no = 1;
 
-                                    <?php $no = 1; ?>
+                                if (mysqli_num_rows($hasil) > 0) {
 
-                                    <?php foreach ($data_kelas as $row): ?>
+                                    while ($row = mysqli_fetch_assoc($hasil)) {
+                                ?>
 
-                                        <tr>
-                                            <td><?= $no++; ?></td>
+                                <tr>
 
-                                            <td>
-                                                <?= e($row['nama'] ?? '-'); ?>
-                                            </td>
+                                    <td>
+                                        <?= $no++; ?>
+                                    </td>
 
-                                            <td>
-                                                <?= e($row['tingkat'] ?? '-'); ?>
-                                            </td>
+                                    <td>
+                                        <?= e($row['nama'] ?? '-'); ?>
+                                    </td>
 
-                                            <td>
-                                                <?= e($row['jurusan'] ?? '-'); ?>
-                                            </td>
+                                    <td>
+                                        <?= e($row['tingkat'] ?? '-'); ?>
+                                    </td>
 
-                                            <td>
-                                                <?php if ((int)($row['status_aktif'] ?? 0) === 1): ?>
-                                                    <span class="badge bg-success">
-                                                        Aktif
-                                                    </span>
-                                                <?php else: ?>
-                                                    <span class="badge bg-secondary">
-                                                        Tidak Aktif
-                                                    </span>
-                                                <?php endif; ?>
-                                            </td>
+                                    <td>
+                                        <?= e($row['jurusan'] ?? '-'); ?>
+                                    </td>
 
-                                            <td>
-                                                <div class="d-flex gap-1">
+                                    <td>
 
-                                                    <a href="edit_kelas.php?id=<?= (int)$row['id']; ?>"
-                                                       class="btn btn-warning btn-sm">
-                                                        Edit
-                                                    </a>
+                                        <?php if ((int)($row['status_aktif'] ?? 0) === 1) { ?>
 
-                                                    
-                                                <form action="hapus_kelas.php" method="POST"
-                                                    onsubmit="return confirm('Yakin ingin menghapus kelas ini?')"
-                                                    class="d-inline">
+                                            <span class="badge bg-success">
+                                                Aktif
+                                            </span>
 
-                                                    <input type="hidden" name="id"
-                                                        value="<?= (int)$data['id']; ?>">
+                                        <?php } else { ?>
 
-                                                    <button type="submit" class="btn btn-danger btn-sm">
-                                                        Hapus
-                                                    </button>
-                                                </form>
+                                            <span class="badge bg-secondary">
+                                                Tidak Aktif
+                                            </span>
 
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        <?php } ?>
 
-                                    <?php endforeach; ?>
+                                    </td>
 
-                                <?php else: ?>
+                                    <td>
 
-                                    <tr>
-                                        <td colspan="6" class="text-center py-4">
-                                            Belum ada data kelas.
-                                        </td>
-                                    </tr>
+                                        <div class="d-flex gap-2">
 
-                                <?php endif; ?>
+                                            <!-- EDIT -->
+                                            <a href="edit_kelas.php?id=<?= (int)$row['id']; ?>"
+                                               class="btn btn-warning btn-sm">
+                                                Edit
+                                            </a>
+
+                                            <!-- HAPUS -->
+                                            <form action="hapus_kelas.php"
+                                                  method="POST"
+                                                  onsubmit="return confirm('Yakin ingin menghapus kelas ini?');"
+                                                  class="d-inline">
+
+                                                <input type="hidden"
+                                                       name="id"
+                                                       value="<?= (int)$row['id']; ?>">
+
+                                                <button type="submit"
+                                                        class="btn btn-danger btn-sm">
+                                                    Hapus
+                                                </button>
+
+                                            </form>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                                <?php
+                                    }
+
+                                } else {
+                                ?>
+
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        Belum ada data kelas.
+                                    </td>
+                                </tr>
+
+                                <?php } ?>
 
                             </tbody>
 
                         </table>
 
-                        <p id="infoData" class="text-secondary small"></p>
-
                     </div>
 
                 </div>
+
             </div>
 
         </main>
@@ -238,58 +227,94 @@ while ($row = mysqli_fetch_assoc($query)) {
     </div>
 </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Pencarian dan pilihan jumlah data -->
+<!-- BOOTSTRAP JAVASCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- JQUERY -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- DATATABLES -->
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+
+<!-- DATATABLES BOOTSTRAP 5 -->
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
+
+
+<!-- KONFIGURASI DATATABLES -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const cariData = document.getElementById('cariData');
-    const jumlahData = document.getElementById('jumlahData');
-    const tabel = document.getElementById('tabelKelas');
-    const infoData = document.getElementById('infoData');
 
-    const semuaBaris = Array.from(tabel.querySelectorAll('tr'));
-    const barisData = semuaBaris.filter(function (baris) {
-        return baris.cells.length === 6;
+$(document).ready(function () {
+
+    $('#tabelkelas').DataTable({
+
+        // Jumlah data awal
+        pageLength: 10,
+
+        // Pilihan jumlah data
+        lengthMenu: [5, 10, 25, 50, 100],
+
+        // Mengaktifkan pengurutan
+        ordering: true,
+
+        // Mengaktifkan pencarian
+        searching: true,
+
+        // Mengaktifkan pagination
+        paging: true,
+
+        // Mengaktifkan informasi jumlah data
+        info: true,
+
+        // Bahasa Indonesia
+        language: {
+
+            emptyTable: "Belum ada data kelas",
+
+            zeroRecords: "Data kelas tidak ditemukan",
+
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+
+            infoEmpty: "Menampilkan 0 data",
+
+            infoFiltered: "(difilter dari _MAX_ total data)",
+
+            lengthMenu: "Tampilkan _MENU_ data",
+
+            search: "Cari:",
+
+            paginate: {
+
+                first: "Pertama",
+
+                last: "Terakhir",
+
+                next: "Berikutnya",
+
+                previous: "Sebelumnya"
+
+            }
+
+        },
+
+        // Pengaturan kolom
+        columnDefs: [
+
+            {
+                targets: [0, 5],
+                orderable: false,
+                searchable: false
+            }
+
+        ],
+
+        // Urutkan berdasarkan nama kelas
+        order: [[1, 'asc']]
+
     });
 
-    function tampilkanData() {
-        const kataKunci = cariData.value.toLowerCase().trim();
-        const batas = jumlahData.value === 'all'
-            ? Infinity
-            : parseInt(jumlahData.value, 10);
-
-        let cocok = 0;
-        let ditampilkan = 0;
-
-        barisData.forEach(function (baris) {
-            const sesuai = baris.textContent.toLowerCase().includes(kataKunci);
-
-            if (sesuai) {
-                cocok++;
-
-                if (ditampilkan < batas) {
-                    baris.hidden = false;
-                    baris.cells[0].textContent = ++ditampilkan;
-                } else {
-                    baris.hidden = true;
-                }
-            } else {
-                baris.hidden = true;
-            }
-        });
-
-        infoData.textContent =
-            'Menampilkan ' + ditampilkan + ' dari ' + cocok +
-            ' data yang cocok (total ' + barisData.length + ' data).';
-    }
-
-    cariData.addEventListener('input', tampilkanData);
-    jumlahData.addEventListener('change', tampilkanData);
-
-    tampilkanData();
 });
+
 </script>
 
 </body>

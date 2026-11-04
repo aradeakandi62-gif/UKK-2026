@@ -1,78 +1,43 @@
 <?php
-session_start();
+include "config/koneksi.php";
 
-include 'config/koneksi.php';
-include 'includes/cek_session.php';
+$error = "";
 
-function e($value) {
-    return htmlspecialchars(
-        (string)($value ?? ''),
-        ENT_QUOTES,
-        'UTF-8'
-    );
-}
-
-$error = '';
-$nama = trim($_POST['nama_tahun_ajaran'] ?? '');
-
-// Deteksi kolom nama tahun ajaran yang tersedia
-$kolomNama = null;
-
-$resultKolom = mysqli_query(
-    $koneksi,
-    "SHOW COLUMNS FROM t_tahun_ajaran"
-);
-
-if (!$resultKolom) {
-    exit('Gagal membaca struktur tabel: ' . e(mysqli_error($koneksi)));
-}
-
-$kolomTersedia = [];
-
-while ($kolom = mysqli_fetch_assoc($resultKolom)) {
-    $kolomTersedia[] = $kolom['Field'];
-}
-
-foreach (['nama_tahun_ajaran', 'nama', 'tahun_ajaran'] as $calon) {
-    if (in_array($calon, $kolomTersedia, true)) {
-        $kolomNama = $calon;
-        break;
-    }
-}
-
-if ($kolomNama === null) {
-    exit(
-        'Kolom nama tahun ajaran tidak ditemukan. ' .
-        'Silakan periksa struktur tabel t_tahun_ajaran di phpMyAdmin.'
-    );
-}
-
-// Simpan data
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nama = trim($_POST['nama'] ?? '');
 
     if ($nama === '') {
-        $error = 'Nama tahun ajaran wajib diisi.';
+        $error = "Nama kelas wajib diisi.";
     } else {
-        $sql = "INSERT INTO t_tahun_ajaran (`$kolomNama`) VALUES (?)";
+        $tingkat = 'X';
+        $jurusan = 'RPL';
+        $status_aktif = 1;
 
-        $stmt = mysqli_prepare($koneksi, $sql);
+        $stmt = $koneksi->prepare(
+            "INSERT INTO t_kelas
+            (nama, tingkat, jurusan, status_aktif)
+            VALUES (?, ?, ?, ?)"
+        );
 
         if (!$stmt) {
-            $error = 'Query gagal: ' . mysqli_error($koneksi);
+            $error = "Gagal menyiapkan query: " . $koneksi->error;
         } else {
-            mysqli_stmt_bind_param($stmt, 's', $nama);
+            $stmt->bind_param(
+                "sssi",
+                $nama,
+                $tingkat,
+                $jurusan,
+                $status_aktif
+            );
 
-            if (mysqli_stmt_execute($stmt)) {
-                mysqli_stmt_close($stmt);
-
-                header('Location: tahun_ajaran.php');
+            if ($stmt->execute()) {
+                $stmt->close();
+                header("Location: data_kelas.php");
                 exit;
+            } else {
+                $error = "Data gagal disimpan: " . $stmt->error;
+                $stmt->close();
             }
-
-            $error = 'Gagal menyimpan data: ' .
-                     mysqli_stmt_error($stmt);
-
-            mysqli_stmt_close($stmt);
         }
     }
 }
@@ -83,87 +48,145 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <title>Tambah Tahun Ajaran</title>
+    <title>Tambah tahun ajaran</title>
 
     <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet">
 </head>
 
 <body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 col-lg-2 bg-dark text-white min-vh-100 p-3">
 
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
+    <h4 class="text-white mb-4">My Website</h4>
 
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <strong>Tambah Tahun Ajaran</strong>
+    <ul class="nav flex-column gap-2">
+
+        <li class="nav-item">
+            <a href="dashboard.php" class="nav-link text-white text-decoration-none">
+                Dashboard
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="kelola_siswa.php" class="nav-link text-white text-decoration-none">
+                Data Siswa
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="kelola_guru.php" class="nav-link text-white text-decoration-none">
+                Data Guru
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="kelola_kelas.php" class="nav-link text-white text-decoration-none">
+                Kelas
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="tahun_ajaran.php" class="nav-link text-white text-decoration-none">
+                Tahun Ajaran
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="penempatan_siswa.php" class="nav-link text-white text-decoration-none">
+                Penempatan Siswa
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="wali_kelas.php" class="nav-link text-white text-decoration-none">
+                Wali Kelas
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="kelola_jenis_pelanggaran.php" class="nav-link text-white text-decoration-none">
+                Kategori Pelanggaran
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="jenis_pelanggaran.php" class="nav-link text-white text-decoration-none">
+                Jenis Pelanggaran
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="laporan.php" class="nav-link text-white text-decoration-none">
+                Laporan
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="about.php" class="nav-link text-white text-decoration-none">
+                About Me
+            </a>
+        </li>
+
+        <li class="nav-item mt-2">
+            <a href="logout.php" class="nav-link text-danger text-decoration-none">
+                Logout
+            </a>
+        </li>
+
+    </ul>
+
+</div>
+
+
+        <div class="col-md-10 p-4">
+            <h2>Tambah tahun ajaran</h2>
+            <p class="text-secondary">Tambahkan data kelas baru</p>
+
+            <?php if ($error !== ''): ?>
+                <div class="alert alert-danger">
+                    <?= htmlspecialchars($error) ?>
+                </div>
+            <?php endif; ?>
+
+            <div class="card">
+                <div class="card-header fw-bold">
+                    Form Tambah tahun ajaran
                 </div>
 
-                <div class="card-body p-4">
-
-                    <h3 class="mb-2">Tambah Tahun Ajaran</h3>
-
-                    <p class="text-secondary">
-                        Tambahkan tahun ajaran baru ke sistem.
-                    </p>
-
-                    <?php if ($error !== ''): ?>
-                        <div class="alert alert-danger">
-                            <?= e($error); ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <form method="POST">
+                <div class="card-body">
+                    <form method="POST" action="">
 
                         <div class="mb-3">
-                            <label
-                                for="nama_tahun_ajaran"
-                                class="form-label"
-                            >
-                                Nama Tahun Ajaran
-                            </label>
-
+                            <label class="form-label">tahun ajaran</label>
                             <input
                                 type="text"
-                                name="nama_tahun_ajaran"
-                                id="nama_tahun_ajaran"
+                                name="nama"
                                 class="form-control"
-                                placeholder="Contoh: 2026/2027"
-                                value="<?= e($nama); ?>"
-                                required
-                            >
+                                placeholder="Contoh: X RPL 1"
+                                required>
                         </div>
 
                         <button
                             type="submit"
-                            class="btn btn-primary"
-                        >
-                            Simpan Tahun Ajaran
+                            class="btn btn-primary">
+                            Simpan Kelas
                         </button>
 
                         <a
                             href="tahun_ajaran.php"
-                            class="btn btn-secondary"
-                        >
+                            class="btn btn-secondary">
                             Kembali
                         </a>
 
                     </form>
-
                 </div>
             </div>
-
         </div>
+
     </div>
 </div>
-
-<script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-</script>
-
 </body>
 </html>

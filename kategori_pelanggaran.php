@@ -36,11 +36,13 @@ if (!$query) {
 
     <title>Kategori Pelanggaran</title>
 
-    <!-- Bootstrap CSS -->
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+    <!-- BOOTSTRAP 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <!-- DATATABLES BOOTSTRAP 5 -->
+    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
+          rel="stylesheet">
 
 </head>
 
@@ -57,24 +59,25 @@ if (!$query) {
         <!-- KONTEN UTAMA -->
         <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
-            <h2>Kategori Pelanggaran</h2>
+            <h2 class="mb-1">Kategori Pelanggaran</h2>
 
-            <p class="text-secondary">
+            <p class="text-secondary mb-4">
                 Kelola kategori pelanggaran siswa.
             </p>
 
 
             <!-- CARD DATA KATEGORI -->
-            <div class="card border mb-3">
-
+            <div class="card shadow-sm">
 
                 <!-- HEADER -->
-                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
 
-                    <strong>Data Kategori Pelanggaran</strong>
+                    <h5 class="mb-0">
+                        Data Kategori Pelanggaran
+                    </h5>
 
                     <a href="tambah_kategori_pelanggaran.php"
-                       class="btn btn-primary">
+                       class="btn btn-primary btn-sm">
 
                         + Tambah Kategori
 
@@ -83,71 +86,27 @@ if (!$query) {
                 </div>
 
 
+                <!-- BODY CARD -->
                 <div class="card-body">
 
-
-                    <!-- PENCARIAN DAN JUMLAH DATA -->
-                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-
-
-                        <!-- JUMLAH DATA -->
-                        <div>
-
-                            Tampilkan
-
-                            <select
-                                id="jumlahData"
-                                class="form-select d-inline-block w-auto"
-                            >
-
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-
-                            </select>
-
-                            data
-
-                        </div>
-
-
-                        <!-- PENCARIAN -->
-                        <div class="d-flex align-items-center gap-2">
-
-                            <label for="cariKategori">
-                                Cari:
-                            </label>
-
-                            <input
-                                type="text"
-                                id="cariKategori"
-                                class="form-control"
-                                placeholder="Cari kategori..."
-                            >
-
-                        </div>
-
-                    </div>
-
-
-
-                    <!-- TABEL KATEGORI -->
                     <div class="table-responsive">
 
-                        <table
-                            class="table table-bordered table-striped table-hover align-middle"
-                            id="tabelKategori"
-                        >
+                        <table id="tabelKategori"
+                               class="table table-bordered table-striped table-hover align-middle w-100">
 
+                            <!-- HEADER TABEL -->
                             <thead class="table-dark">
 
                                 <tr>
 
                                     <th>No</th>
+
                                     <th>Nama Kategori</th>
+
                                     <th>Deskripsi</th>
+
                                     <th>Status</th>
+
                                     <th>Aksi</th>
 
                                 </tr>
@@ -155,102 +114,95 @@ if (!$query) {
                             </thead>
 
 
+                            <!-- ISI TABEL -->
                             <tbody>
 
                                 <?php
+
                                 $no = 1;
 
                                 if (mysqli_num_rows($query) > 0):
 
                                     while ($data = mysqli_fetch_assoc($query)):
+
                                 ?>
 
-                                    <tr>
+                                <tr>
 
-                                        <!-- NOMOR -->
-                                        <td>
-                                            <?= $no++; ?>
-                                        </td>
-
-
-                                        <!-- NAMA KATEGORI -->
-                                        <td>
-                                            <?= e($data['nama'] ?? ''); ?>
-                                        </td>
+                                    <!-- NOMOR -->
+                                    <td>
+                                        <?= $no++; ?>
+                                    </td>
 
 
-                                        <!-- DESKRIPSI -->
-                                        <td>
-                                            <?= e($data['deskripsi'] ?? '-'); ?>
-                                        </td>
+                                    <!-- NAMA KATEGORI -->
+                                    <td>
+                                        <?= e($data['nama'] ?? ''); ?>
+                                    </td>
 
 
-                                        <!-- STATUS -->
-                                        <td>
-
-                                            <?php if (($data['status_aktif'] ?? 0) == 1): ?>
-
-                                                <span class="badge bg-success">
-                                                    Aktif
-                                                </span>
-
-                                            <?php else: ?>
-
-                                                <span class="badge bg-secondary">
-                                                    Tidak Aktif
-                                                </span>
-
-                                            <?php endif; ?>
-
-                                        </td>
+                                    <!-- DESKRIPSI -->
+                                    <td>
+                                        <?= e($data['deskripsi'] ?? '-'); ?>
+                                    </td>
 
 
-                                        <!-- AKSI -->
-                                        <td>
+                                    <!-- STATUS -->
+                                    <td>
 
-                                            <div class="d-flex gap-1">
+                                        <?php if (($data['status_aktif'] ?? 0) == 1): ?>
 
-                                                <!-- EDIT -->
-                                                <a
-                                                    href="edit_kategori_pelanggaran.php?id=<?= (int)$data['id']; ?>"
-                                                    class="btn btn-warning btn-sm"
-                                                >
-                                                    Edit
-                                                </a>
+                                            <span class="badge bg-success">
+                                                Aktif
+                                            </span>
+
+                                        <?php else: ?>
+
+                                            <span class="badge bg-secondary">
+                                                Tidak Aktif
+                                            </span>
+
+                                        <?php endif; ?>
+
+                                    </td>
 
 
-                                                <!-- HAPUS -->
-                                                <a
-                                                    href="hapus_kategori_pelanggaran.php?id=<?= (int)$data['id']; ?>"
-                                                    class="btn btn-danger btn-sm"
-                                                    onclick="return confirm('Yakin ingin menghapus kategori ini?')"
-                                                >
-                                                    Hapus
-                                                </a>
+                                    <!-- AKSI -->
+                                    <td>
 
-                                            </div>
+                                        <div class="d-flex gap-2">
 
-                                        </td>
+                                            <!-- EDIT -->
+                                            <a href="edit_kategori_pelanggaran.php?id=<?= (int)$data['id']; ?>"
+                                               class="btn btn-warning btn-sm">
 
-                                    </tr>
+                                                Edit
+
+                                            </a>
+
+
+                                            <!-- HAPUS -->
+                                            <a href="hapus_kategori_pelanggaran.php?id=<?= (int)$data['id']; ?>"
+                                               class="btn btn-danger btn-sm"
+                                               onclick="return confirm('Yakin ingin menghapus kategori ini?')">
+
+                                                Hapus
+
+                                            </a>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
 
                                 <?php
+
                                     endwhile;
 
-                                else:
+                                endif;
+
                                 ?>
-
-                                    <tr>
-
-                                        <td colspan="5" class="text-center py-4">
-
-                                            Belum ada data kategori pelanggaran.
-
-                                        </td>
-
-                                    </tr>
-
-                                <?php endif; ?>
 
                             </tbody>
 
@@ -258,53 +210,9 @@ if (!$query) {
 
                     </div>
 
-
-
-                    <!-- INFORMASI DATA DAN PAGINATION -->
-                    <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
-
-
-                        <!-- INFORMASI -->
-                        <div id="infoData">
-
-                            Menampilkan data
-
-                        </div>
-
-
-                        <!-- TOMBOL HALAMAN -->
-                        <div>
-
-                            <button
-                                type="button"
-                                class="btn btn-outline-primary btn-sm"
-                                id="sebelumnya"
-                            >
-
-                                Sebelumnya
-
-                            </button>
-
-
-                            <button
-                                type="button"
-                                class="btn btn-outline-primary btn-sm"
-                                id="berikutnya"
-                            >
-
-                                Berikutnya
-
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
                 </div>
 
             </div>
-
 
         </main>
 
@@ -313,177 +221,93 @@ if (!$query) {
 </div>
 
 
-
 <!-- BOOTSTRAP JAVASCRIPT -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 
+<!-- JQUERY -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<!-- JAVASCRIPT TABEL -->
+
+<!-- DATATABLES -->
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+
+
+<!-- DATATABLES BOOTSTRAP 5 -->
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
+
+
+<!-- KONFIGURASI DATATABLES -->
 <script>
 
-document.addEventListener("DOMContentLoaded", function () {
+$(document).ready(function () {
 
-    // Mengambil elemen HTML
-    const tabel = document.getElementById("tabelKategori");
+    $('#tabelKategori').DataTable({
 
-    const jumlahData = document.getElementById("jumlahData");
+        // Jumlah data awal
+        pageLength: 10,
 
-    const cariKategori = document.getElementById("cariKategori");
+        // Pilihan jumlah data
+        lengthMenu: [5, 10, 25, 50, 100],
 
-    const infoData = document.getElementById("infoData");
+        // Mengaktifkan sortir
+        ordering: true,
 
-    const sebelumnya = document.getElementById("sebelumnya");
+        // Mengaktifkan pencarian
+        searching: true,
 
-    const berikutnya = document.getElementById("berikutnya");
+        // Mengaktifkan pagination
+        paging: true,
 
+        // Informasi jumlah data
+        info: true,
 
-    // Mengambil tbody
-    const tbody = tabel.querySelector("tbody");
+        // Bahasa Indonesia
+        language: {
 
+            emptyTable: "Belum ada data kategori pelanggaran",
 
-    // Mengambil seluruh baris data
-    const semuaBaris = Array.from(
-        tbody.querySelectorAll("tr")
-    ).filter(row => row.cells.length === 5);
+            zeroRecords: "Data kategori tidak ditemukan",
 
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
 
-    // Variabel halaman
-    let halaman = 1;
+            infoEmpty: "Menampilkan 0 data",
 
-    let dataFilter = [...semuaBaris];
+            infoFiltered: "(difilter dari _MAX_ total data)",
 
+            lengthMenu: "Tampilkan _MENU_ data",
 
+            search: "Cari:",
 
-    // FUNGSI MENAMPILKAN DATA
-    function tampilkanData() {
+            paginate: {
 
-        const perHalaman = parseInt(jumlahData.value);
+                first: "Pertama",
 
-        const totalData = dataFilter.length;
+                last: "Terakhir",
 
-        const totalHalaman = Math.ceil(
-            totalData / perHalaman
-        );
+                next: "Berikutnya",
 
+                previous: "Sebelumnya"
 
-        // Memastikan halaman tetap benar
-        if (halaman > totalHalaman) {
+            }
 
-            halaman = Math.max(1, totalHalaman);
+        },
 
-        }
+        // Pengaturan kolom
+        columnDefs: [
 
+            {
+                targets: [0, 4],
+                orderable: false,
+                searchable: false
+            }
 
-        // Sembunyikan seluruh baris
-        semuaBaris.forEach(row => {
+        ],
 
-            row.hidden = true;
-
-        });
-
-
-        // Menghitung posisi data
-        const awal = (halaman - 1) * perHalaman;
-
-        const akhir = awal + perHalaman;
-
-
-        // Menampilkan data sesuai pilihan
-        dataFilter.slice(awal, akhir).forEach(row => {
-
-            row.hidden = false;
-
-        });
-
-
-        // Menghitung informasi data
-        const dari = totalData === 0 ? 0 : awal + 1;
-
-        const sampai = Math.min(akhir, totalData);
-
-
-        // Menampilkan informasi
-        infoData.textContent =
-            `Menampilkan ${dari} sampai ${sampai} dari ${totalData} data`;
-
-
-        // Mengatur tombol pagination
-        sebelumnya.disabled = halaman <= 1;
-
-        berikutnya.disabled = halaman >= totalHalaman;
-
-    }
-
-
-
-    // DROPDOWN JUMLAH DATA
-    jumlahData.addEventListener("change", function () {
-
-        halaman = 1;
-
-        tampilkanData();
+        // Urutkan berdasarkan nama kategori
+        order: [[1, 'asc']]
 
     });
-
-
-
-    // PENCARIAN KATEGORI
-    cariKategori.addEventListener("input", function () {
-
-        const keyword = this.value.toLowerCase();
-
-        dataFilter = semuaBaris.filter(row => {
-
-            return row.textContent.toLowerCase().includes(keyword);
-
-        });
-
-
-        halaman = 1;
-
-        tampilkanData();
-
-    });
-
-
-
-    // TOMBOL SEBELUMNYA
-    sebelumnya.addEventListener("click", function () {
-
-        if (halaman > 1) {
-
-            halaman--;
-
-            tampilkanData();
-
-        }
-
-    });
-
-
-
-    // TOMBOL BERIKUTNYA
-    berikutnya.addEventListener("click", function () {
-
-        const totalHalaman = Math.ceil(
-            dataFilter.length / parseInt(jumlahData.value)
-        );
-
-        if (halaman < totalHalaman) {
-
-            halaman++;
-
-            tampilkanData();
-
-        }
-
-    });
-
-
-
-    // TAMPILKAN DATA PERTAMA KALI
-    tampilkanData();
 
 });
 

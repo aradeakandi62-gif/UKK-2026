@@ -46,45 +46,88 @@ if (isset($_POST['simpan'])) {
 <div class="d-flex">
 
     <!-- SIDEBAR -->
-    <div class="bg-dark text-white p-3 min-vh-100"
-         style="width: 230px;">
+<div class="col-md-3 col-lg-2 bg-dark text-white min-vh-100 p-3">
 
-        <h4 class="mb-4">My Website</h4>
+    <h4 class="text-white mb-4">My Website</h4>
 
-        <div class="nav flex-column">
+    <ul class="nav flex-column gap-2">
 
-            <a href="dashboard.php" class="nav-link text-white mb-2">
+        <li class="nav-item">
+            <a href="dashboard.php" class="nav-link text-white text-decoration-none">
                 Dashboard
             </a>
+        </li>
 
-            <a href="data_siswa.php" class="nav-link text-white mb-2">
+        <li class="nav-item">
+            <a href="kelola_siswa.php" class="nav-link text-white text-decoration-none">
                 Data Siswa
             </a>
+        </li>
 
-            <a href="data_guru.php" class="nav-link text-white mb-2">
+        <li class="nav-item">
+            <a href="kelola_guru.php" class="nav-link text-white text-decoration-none">
                 Data Guru
             </a>
+        </li>
 
-            <a href="data_kelas.php" class="nav-link text-white mb-2">
+        <li class="nav-item">
+            <a href="kelola_kelas.php" class="nav-link text-white text-decoration-none">
                 Kelas
             </a>
+        </li>
 
-            <a href="laporan.php" class="nav-link text-white mb-2">
+        <li class="nav-item">
+            <a href="tahun_ajaran.php" class="nav-link text-white text-decoration-none">
+                Tahun Ajaran
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="penempatan_siswa.php" class="nav-link text-white text-decoration-none">
+                Penempatan Siswa
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="wali_kelas.php" class="nav-link text-white text-decoration-none">
+                Wali Kelas
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="kelola_jenis_pelanggaran.php" class="nav-link text-white text-decoration-none">
+                Kategori Pelanggaran
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="jenis_pelanggaran.php" class="nav-link text-white text-decoration-none">
+               Jenis Pelanggaran 
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="laporan.php" class="nav-link text-white text-decoration-none">
                 Laporan
             </a>
+        </li>
 
-            <a href="about.php" class="nav-link text-white mb-4">
+        <li class="nav-item">
+            <a href="about.php" class="nav-link text-white text-decoration-none">
                 About Me
             </a>
+        </li>
 
-            <hr>
-
-            <a href="logout.php" class="nav-link text-danger">
+        <li class="nav-item mt-2">
+            <a href="logout.php" class="nav-link text-danger text-decoration-none">
                 Logout
             </a>
+        </li>
 
-        </div>
-    </div>
+    </ul>
+
+</div>
+
 
     <!-- CONTENT -->
     <div class="flex-grow-1 p-4">

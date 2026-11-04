@@ -89,30 +89,88 @@ if (!$query_user) {
           rel="stylesheet">
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
+    <div class="d-flex">
+<div class="col-md-3 col-lg-2 bg-dark text-white min-vh-100 p-3">
 
-        <div class="col-md-2 bg-dark min-vh-100 p-3">
-            <h4 class="text-white mb-4">My Website</h4>
+    <h4 class="text-white mb-4">My Website</h4>
 
-            <ul class="nav nav-pills flex-column gap-2">
-                <li class="nav-item">
-                    <a href="dashboard.php" class="nav-link text-white">Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a href="data_siswa.php" class="nav-link text-white">Data Siswa</a>
-                </li>
-                <li class="nav-item">
-                    <a href="data_guru.php" class="nav-link active">Data Guru</a>
-                </li>
-                <li class="nav-item">
-                    <a href="data_kelas.php" class="nav-link text-white">Kelas</a>
-                </li>
-                <li class="nav-item">
-                    <a href="logout.php" class="nav-link text-danger">Logout</a>
-                </li>
-            </ul>
-        </div>
+    <ul class="nav flex-column gap-2">
+
+        <li class="nav-item">
+            <a href="dashboard.php" class="nav-link text-white text-decoration-none">
+                Dashboard
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="kelola_siswa.php" class="nav-link text-white text-decoration-none">
+                Data Siswa
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="kelola_guru.php" class="nav-link text-white text-decoration-none">
+                Data Guru
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="kelola_kelas.php" class="nav-link text-white text-decoration-none">
+                Kelas
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="tahun_ajaran.php" class="nav-link text-white text-decoration-none">
+                Tahun Ajaran
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="penempatan_siswa.php" class="nav-link text-white text-decoration-none">
+                Penempatan Siswa
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="wali_kelas.php" class="nav-link text-white text-decoration-none">
+                Wali Kelas
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="kelola_jenis_pelanggaran.php" class="nav-link text-white text-decoration-none">
+                Kategori Pelanggaran
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="jenis_pelanggaran.php" class="nav-link text-white text-decoration-none">
+               Jenis Pelanggaran 
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="laporan.php" class="nav-link text-white text-decoration-none">
+                Laporan
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="about.php" class="nav-link text-white text-decoration-none">
+                About Me
+            </a>
+        </li>
+
+        <li class="nav-item mt-2">
+            <a href="logout.php" class="nav-link text-danger text-decoration-none">
+                Logout
+            </a>
+        </li>
+
+    </ul>
+
+</div>
 
         <div class="col-md-10 p-4">
             <h2>Tambah Guru</h2>
@@ -200,19 +258,21 @@ if (!$query_user) {
                             </div>
                         </div>
 
-                        <div class="d-flex gap-2 mt-4">
-                            <a href="data_guru.php"
-                               class="btn btn-secondary">
-                                Kembali
-                            </a>
+                            <!-- TOMBOL -->
+                    <div class="d-flex gap-2">
 
-                            <button type="submit"
-                                    name="simpan"
-                                    value="1"
-                                    class="btn btn-primary">
-                                Simpan Guru
-                            </button>
-                        </div>
+                        <button type="submit" name="simpan"
+                                class="btn btn-primary">
+                            Simpan Siswa
+                        </button>
+
+                        <a href="data_guru.php"
+                           class="btn btn-secondary">
+                            Kembali
+                        </a>
+
+                    </div>
+
 
                     </form>
 
