@@ -1,287 +1,258 @@
-
 <?php
 session_start();
+
 include 'config/koneksi.php';
 include 'includes/cek_session.php';
 
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $nip = trim($_POST['nip'] ?? '');
     $nama = trim($_POST['nama'] ?? '');
     $email = trim($_POST['email'] ?? '');
-    $user_id = (int) ($_POST['user_id'] ?? 0);
+    $password = $_POST['password'] ?? '';
+    $status_aktif = (int) ($_POST['status_aktif'] ?? 1);
 
-    if ($nip === '' || $nama === '' || $email === '' || $user_id <= 0) {
+    if ($nip === '' || $nama === '' || $email === '' || $password === '') {
         $error = 'Semua data wajib diisi!';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Format email tidak valid!';
+    } elseif (strlen($password) < 6) {
+        $error = 'Password minimal 6 karakter!';
     } else {
-        // Periksa apakah NIP sudah digunakan
-        $cek = mysqli_prepare(
-            $koneksi,
-            "SELECT id FROM t_guru WHERE nip = ? OR email = ? LIMIT 1"
-        );
+
+        // Cek NIP dan email
+        $cek = mysqli_prepare($koneksi, "
+            SELECT id FROM t_guru
+            WHERE nip = ? OR email = ?
+            LIMIT 1
+        ");
 
         mysqli_stmt_bind_param($cek, "ss", $nip, $email);
         mysqli_stmt_execute($cek);
         $hasil = mysqli_stmt_get_result($cek);
 
-        if (mysqli_num_rows($hasil) > 0) {
-            $error = 'NIP atau email sudah terdaftar!';
-        } else {
-            // Simpan data guru
-            $stmt = mysqli_prepare(
-                $koneksi,
-                "INSERT INTO t_guru
-                (nip, nama, email, status_aktif, user_id, created_at, updated_at)
-                VALUES (?, ?, ?, 1, ?, NOW(), NOW())"
-            );
+        // Cek email di tabel user
+        $cek_user = mysqli_prepare($koneksi, "
+            SELECT id FROM t_users
+            WHERE email = ?
+            LIMIT 1
+        ");
 
-            if ($stmt) {
+        mysqli_stmt_bind_param($cek_user, "s", $email);
+        mysqli_stmt_execute($cek_user);
+        $hasil_user = mysqli_stmt_get_result($cek_user);
+
+        if (mysqli_num_rows($hasil) > 0) {
+
+            $error = 'NIP atau email guru sudah terdaftar!';
+
+        } elseif (mysqli_num_rows($hasil_user) > 0) {
+
+            $error = 'Email sudah digunakan oleh akun lain!';
+
+        } else {
+
+            // Enkripsi password
+            $password_hash = password_hash($password, PASSWORD_DEFAULT);
+
+            // Mulai transaksi
+            mysqli_begin_transaction($koneksi);
+
+            try {
+
+                // Simpan akun ke t_users
+                $stmt_user = mysqli_prepare($koneksi, "
+                    INSERT INTO t_users
+                    (name, email, password, role)
+                    VALUES (?, ?, ?, 'guru')
+                ");
+
+                if (!$stmt_user) {
+                    throw new Exception(mysqli_error($koneksi));
+                }
+
                 mysqli_stmt_bind_param(
-                    $stmt,
-                    "sssi",
+                    $stmt_user,
+                    "sss",
+                    $nama,
+                    $email,
+                    $password_hash
+                );
+
+                if (!mysqli_stmt_execute($stmt_user)) {
+                    throw new Exception(mysqli_stmt_error($stmt_user));
+                }
+
+                // Ambil ID user yang baru dibuat
+                $user_id = mysqli_insert_id($koneksi);
+
+                // Simpan data guru
+                $stmt_guru = mysqli_prepare($koneksi, "
+                    INSERT INTO t_guru
+                    (nip, nama, email, status_aktif, user_id, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+                ");
+
+                if (!$stmt_guru) {
+                    throw new Exception(mysqli_error($koneksi));
+                }
+
+                mysqli_stmt_bind_param(
+                    $stmt_guru,
+                    "sssii",
                     $nip,
                     $nama,
                     $email,
+                    $status_aktif,
                     $user_id
                 );
 
-                if (mysqli_stmt_execute($stmt)) {
-                    mysqli_stmt_close($stmt);
-                    mysqli_stmt_close($cek);
-
-                    header('Location: data_guru.php');
-                    exit;
-                } else {
-                    $error = 'Gagal menyimpan: ' . mysqli_stmt_error($stmt);
-                    mysqli_stmt_close($stmt);
+                if (!mysqli_stmt_execute($stmt_guru)) {
+                    throw new Exception(mysqli_stmt_error($stmt_guru));
                 }
-            } else {
-                $error = 'Query gagal: ' . mysqli_error($koneksi);
+
+                // Jika semuanya berhasil
+                mysqli_commit($koneksi);
+
+                mysqli_stmt_close($stmt_user);
+                mysqli_stmt_close($stmt_guru);
+                mysqli_stmt_close($cek);
+                mysqli_stmt_close($cek_user);
+
+                header("Location: data_guru.php");
+                exit;
+
+            } catch (Exception $e) {
+
+                mysqli_rollback($koneksi);
+                $error = "Gagal menyimpan data: " . $e->getMessage();
+
             }
         }
 
         mysqli_stmt_close($cek);
+        mysqli_stmt_close($cek_user);
     }
-}
-
-// Ambil data user untuk pilihan
-$query_user = mysqli_query(
-    $koneksi,
-    "SELECT id, name, email FROM t_users ORDER BY name ASC"
-);
-
-if (!$query_user) {
-    $error = 'Gagal mengambil data user: ' . mysqli_error($koneksi);
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>Tambah Guru</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
           rel="stylesheet">
 </head>
+
 <body>
-    <div class="d-flex">
-<div class="col-md-3 col-lg-2 bg-dark text-white min-vh-100 p-3">
 
-    <h4 class="text-white mb-4">My Website</h4>
+<div class="d-flex">
 
-    <ul class="nav flex-column gap-2">
+    <!-- SIDEBAR -->
+    <?php include 'layout/sidebar.php'; ?>
 
-        <li class="nav-item">
-            <a href="dashboard.php" class="nav-link text-white text-decoration-none">
-                Dashboard
-            </a>
-        </li>
+    <!-- KONTEN -->
+    <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
-        <li class="nav-item">
-            <a href="kelola_siswa.php" class="nav-link text-white text-decoration-none">
-                Data Siswa
-            </a>
-        </li>
+        <h2>Tambah Guru</h2>
+        <p class="text-secondary">Tambahkan data guru baru.</p>
 
-        <li class="nav-item">
-            <a href="kelola_guru.php" class="nav-link text-white text-decoration-none">
-                Data Guru
-            </a>
-        </li>
+        <?php if ($error !== ''): ?>
+            <div class="alert alert-danger">
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
 
-        <li class="nav-item">
-            <a href="kelola_kelas.php" class="nav-link text-white text-decoration-none">
-                Kelas
-            </a>
-        </li>
+        <div class="card shadow-sm">
 
-        <li class="nav-item">
-            <a href="tahun_ajaran.php" class="nav-link text-white text-decoration-none">
-                Tahun Ajaran
-            </a>
-        </li>
+            <div class="card-header">
+                Form Tambah Guru
+            </div>
 
-        <li class="nav-item">
-            <a href="penempatan_siswa.php" class="nav-link text-white text-decoration-none">
-                Penempatan Siswa
-            </a>
-        </li>
+            <div class="card-body">
 
-        <li class="nav-item">
-            <a href="wali_kelas.php" class="nav-link text-white text-decoration-none">
-                Wali Kelas
-            </a>
-        </li>
+                <form method="POST" action="">
 
-        <li class="nav-item">
-            <a href="kelola_jenis_pelanggaran.php" class="nav-link text-white text-decoration-none">
-                Kategori Pelanggaran
-            </a>
-        </li>
+                    <div class="mb-3">
+                        <label class="form-label">NIP</label>
+                        <input type="text"
+                               name="nip"
+                               class="form-control"
+                               placeholder="Masukkan NIP"
+                               value="<?= htmlspecialchars($_POST['nip'] ?? '') ?>"
+                               required>
+                    </div>
 
-        <li class="nav-item">
-            <a href="jenis_pelanggaran.php" class="nav-link text-white text-decoration-none">
-               Jenis Pelanggaran 
-            </a>
-        </li>
+                    <div class="mb-3">
+                        <label class="form-label">Nama Guru</label>
+                        <input type="text"
+                               name="nama"
+                               class="form-control"
+                               placeholder="Masukkan nama guru"
+                               value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>"
+                               required>
+                    </div>
 
-        <li class="nav-item">
-            <a href="laporan.php" class="nav-link text-white text-decoration-none">
-                Laporan
-            </a>
-        </li>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email"
+                               name="email"
+                               class="form-control"
+                               placeholder="Masukkan email guru"
+                               value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+                               required>
+                    </div>
 
-        <li class="nav-item">
-            <a href="about.php" class="nav-link text-white text-decoration-none">
-                About Me
-            </a>
-        </li>
-
-        <li class="nav-item mt-2">
-            <a href="logout.php" class="nav-link text-danger text-decoration-none">
-                Logout
-            </a>
-        </li>
-
-    </ul>
-
-</div>
-
-        <div class="col-md-10 p-4">
-            <h2>Tambah Guru</h2>
-            <p class="text-secondary">Tambahkan data guru baru</p>
-
-            <?php if ($error !== ''): ?>
-                <div class="alert alert-danger">
-                    <?= htmlspecialchars($error) ?>
-                </div>
-            <?php endif; ?>
-
-       
-<div class="container-fluid py-4">
-    <div class="row justify-content-center">
-        <div class="col-12">
-
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-
-                    <h3 class="mb-1">Tambah Guru</h3>
-                    <p class="text-secondary mb-4">
-                        Tambahkan data guru baru ke dalam sistem
-                    </p>
-
-                    <form action="" method="POST">
-
-                        <div class="mb-3">
-                            <label for="nip" class="form-label">NIP</label>
-                            <input type="text"
-                                   name="nip"
-                                   id="nip"
-                                   class="form-control"
-                                   placeholder="Masukkan NIP"
-                                   required>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password"
+                               name="password"
+                               class="form-control"
+                               placeholder="Masukkan password minimal 6 karakter"
+                               minlength="6"
+                               required>
+                        <div class="form-text">
+                            Password akan otomatis dienkripsi sebelum disimpan.
                         </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label for="nama" class="form-label">
-                                Nama Guru
-                            </label>
-                            <input type="text"
-                                   name="nama"
-                                   id="nama"
-                                   class="form-control"
-                                   placeholder="Masukkan nama guru"
-                                   required>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="status_aktif" class="form-select">
+                            <option value="1">Aktif</option>
+                            <option value="0">Tidak Aktif</option>
+                        </select>
+                    </div>
 
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email"
-                                   name="email"
-                                   id="email"
-                                   class="form-control"
-                                   placeholder="Masukkan email guru"
-                                   required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="status_aktif" class="form-label">
-                                Status
-                            </label>
-                            <select name="status_aktif"
-                                    id="status_aktif"
-                                    class="form-select"
-                                    required>
-                                <option value="1" selected>Aktif</option>
-                                <option value="0">Tidak Aktif</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="user_id" class="form-label">
-                                User ID
-                            </label>
-                            <input type="number"
-                                   name="user_id"
-                                   id="user_id"
-                                   class="form-control"
-                                   placeholder="Masukkan User ID"
-                                   min="1"
-                                   required>
-                            <div class="form-text">
-                                Masukkan ID yang sudah ada pada tabel t_users.
-                            </div>
-                        </div>
-
-                            <!-- TOMBOL -->
                     <div class="d-flex gap-2">
 
-                        <button type="submit" name="simpan"
-                                class="btn btn-primary">
-                            Simpan Siswa
+                        <button type="submit" class="btn btn-primary">
+                            Simpan Guru
                         </button>
 
-                        <a href="data_guru.php"
-                           class="btn btn-secondary">
+                        <a href="data_guru.php" class="btn btn-secondary">
                             Kembali
                         </a>
 
                     </div>
 
+                </form>
 
-                    </form>
-
-                </div>
             </div>
-
         </div>
-    </div>
+
+    </main>
+
 </div>
-     
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

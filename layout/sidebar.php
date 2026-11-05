@@ -116,7 +116,7 @@ $dashboard = ($role === 'guru') ? 'dashboard_guru.php' : 'dashboard.php';
 
         <?php endif; ?>
 
-        <hr class="text-secondary">
+        <hr class="border-secondary">
 
         <!-- LOGOUT -->
         <li class="nav-item">

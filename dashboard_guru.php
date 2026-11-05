@@ -119,9 +119,15 @@ if (isset($_GET['id_hapus'])) {
         <?php endif; ?>
 
         <?php if ($page == 'dashboard'): ?>
-            <!-- DASHBOARD -->
-            <h2 class="fw-bold mb-2">Dashboard Guru</h2>
-            <p class="text-secondary mb-4">Selamat datang, <?= htmlspecialchars($_SESSION['name'] ?? ''); ?>. Berikut ringkasan sistem pelanggaran siswa.</p>
+            <!-- DASHBOARD -->           
+        <h2>Dashboard Guru</h2>
+
+        <p class="text-muted">
+            Selamat datang,
+            <?= htmlspecialchars($_SESSION['name'] ?? 'Guru'); ?>.
+            Berikut ringkasan sistem pelanggaran siswa.
+        </p>
+
 
             <div class="row g-4">
                 <div class="col-md-4">
@@ -143,6 +149,194 @@ if (isset($_GET['id_hapus'])) {
                     </div>
                 </div>
             </div>
+
+<!-- VARIASI DASHBOARD BAGIAN BAWAH -->
+<div class="row g-4 mt-3">
+
+    <!-- AKSES CEPAT -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body p-4">
+
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-lightning-charge-fill text-warning me-2"></i>
+                    Akses Cepat
+                </h5>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <a href="catat_pelanggaran.php"
+                           class="text-decoration-none text-dark">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <h2>📝</h2>
+                                    <h6 class="fw-bold">Catat Pelanggaran</h6>
+                                    <p class="text-muted small mb-0">
+                                        Tambahkan catatan pelanggaran siswa.
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-6">
+                        <a href="riwayat_pelanggaran.php"
+                           class="text-decoration-none text-dark">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <h2>📋</h2>
+                                    <h6 class="fw-bold">Riwayat Pelanggaran</h6>
+                                    <p class="text-muted small mb-0">
+                                        Lihat riwayat pelanggaran siswa.
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-6">
+                        <a href="referensi_tindakan.php"
+                           class="text-decoration-none text-dark">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <h2>📚</h2>
+                                    <h6 class="fw-bold">Referensi Tindakan</h6>
+                                    <p class="text-muted small mb-0">
+                                        Lihat referensi tindakan pelanggaran.
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-md-6">
+                        <a href="rekap_poin.php"
+                           class="text-decoration-none text-dark">
+                            <div class="card border h-100">
+                                <div class="card-body">
+                                    <h2>📊</h2>
+                                    <h6 class="fw-bold">Rekap Poin Siswa</h6>
+                                    <p class="text-muted small mb-0">
+                                        Pantau rekap poin pelanggaran siswa.
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INFORMASI GURU -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body p-4">
+
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-person-badge me-2"></i>
+                    Informasi Akun
+                </h5>
+
+                <div class="text-center py-3">
+                    <div class="display-3">👨‍🏫</div>
+
+                    <h5 class="fw-bold mt-2">
+                        <?= htmlspecialchars($_SESSION['name'] ?? 'Guru'); ?>
+                    </h5>
+
+                    <span class="badge bg-success">
+                        Guru
+                    </span>
+                </div>
+
+                <hr>
+
+                <p class="text-muted small mb-2">
+                    <i class="bi bi-envelope me-2"></i>
+                    <?= htmlspecialchars($_SESSION['email'] ?? '-'); ?>
+                </p>
+
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    <?= date('d-m-Y'); ?>
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- INFORMASI SISTEM -->
+<div class="card shadow-sm border-0 mt-4 mb-4">
+    <div class="card-body p-4">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-8">
+                <h5 class="fw-bold">
+                    <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                    Sistem Informasi Pelanggaran Siswa
+                </h5>
+
+                <p class="text-muted mb-0">
+                    Sistem ini membantu guru dalam mencatat,
+                    memantau, dan mengelola data pelanggaran
+                    siswa secara lebih mudah dan terstruktur.
+                </p>
+            </div>
+
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <span class="badge bg-success p-2">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Sistem Aktif
+                </span>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <div class="row text-center g-3">
+
+            <div class="col-md-4">
+                <h4>📚</h4>
+                <h6 class="fw-bold">Data Terorganisir</h6>
+                <small class="text-muted">
+                    Pengelolaan data siswa lebih mudah.
+                </small>
+            </div>
+
+            <div class="col-md-4">
+                <h4>⚡</h4>
+                <h6 class="fw-bold">Proses Cepat</h6>
+                <small class="text-muted">
+                    Pencatatan pelanggaran lebih praktis.
+                </small>
+            </div>
+
+            <div class="col-md-4">
+                <h4>📈</h4>
+                <h6 class="fw-bold">Monitoring</h6>
+                <small class="text-muted">
+                    Memudahkan pemantauan poin siswa.
+                </small>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div class="text-center text-muted small mb-3">
+    &copy; <?= date('Y'); ?> Sistem Informasi Pelanggaran Siswa.
+    All Rights Reserved.
+</div>
+
 
         <?php elseif ($page == 'catat'): ?>
             <!-- FORM CATAT PELANGGARAN -->

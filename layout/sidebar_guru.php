@@ -26,6 +26,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </li>
 
         <li class="nav-item mb-2">
+            <a href="catat_pelanggaran.php"
+               class="nav-link <?= ($current_page == 'catat_pelanggaran.php') ? 'active' : 'text-white' ?>">
+                Catat Pelanggaran
+            </a>
+        </li>
+
+        <li class="nav-item mb-2">
             <a href="wali_kelas.php"
                class="nav-link <?= ($current_page == 'wali_kelas.php') ? 'active' : 'text-white' ?>">
                 Wali Kelas
