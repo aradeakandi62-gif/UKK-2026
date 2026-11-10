@@ -1,51 +1,106 @@
+
 <?php
+session_start();
+
 include 'config/koneksi.php';
+include 'includes/cek_session.php';
 
-// Ambil ID dari URL
-$id = $_GET['id'] ?? 0;
+$id = (int) ($_GET['id'] ?? 0);
+$error = '';
 
-// Ambil data siswa berdasarkan ID
-$query = mysqli_query($koneksi, "SELECT * FROM t_siswa WHERE id = '$id'");
-$data = mysqli_fetch_assoc($query);
-
-// Jika data tidak ditemukan
-if (!$data) {
-    echo "Data siswa tidak ditemukan.";
+if ($id <= 0) {
+    header("Location: data_siswa.php");
     exit;
 }
 
-// Jika tombol update ditekan
-if (isset($_POST['update'])) {
+// Ambil data siswa
+$stmt = mysqli_prepare($koneksi, "
+    SELECT *
+    FROM t_siswa
+    WHERE id = ?
+");
 
-    $nis = $_POST['nis'];
-    $nisn = $_POST['nisn'];
-    $nama = $_POST['nama'];
-    $jenis_kelamin = $_POST['jenis_kelamin'];
-    $tanggal_lahir = $_POST['tanggal_lahir'];
-    $alamat = $_POST['alamat'];
-    $status_aktif = $_POST['status_aktif'];
+mysqli_stmt_bind_param($stmt, "i", $id);
+mysqli_stmt_execute($stmt);
 
-    $update = mysqli_query($koneksi, "UPDATE t_siswa SET
-        nis = '$nis',
-        nisn = '$nisn',
-        nama = '$nama',
-        jenis_kelamin = '$jenis_kelamin',
-        tanggal_lahir = '$tanggal_lahir',
-        alamat = '$alamat',
-        status_aktif = '$status_aktif'
-        WHERE id = '$id'
-    ");
+$result = mysqli_stmt_get_result($stmt);
+$data = mysqli_fetch_assoc($result);
 
-    if ($update) {
+mysqli_stmt_close($stmt);
 
-        header("Location: data_siswa.php");
-        exit;
+if (!$data) {
+    die("Data siswa tidak ditemukan.");
+}
 
+// Proses update
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $nis = trim($_POST['nis'] ?? '');
+    $nisn = trim($_POST['nisn'] ?? '');
+    $nama = trim($_POST['nama'] ?? '');
+    $jenis_kelamin = $_POST['jenis_kelamin'] ?? '';
+    $tanggal_lahir = $_POST['tanggal_lahir'] ?? '';
+    $alamat = trim($_POST['alamat'] ?? '');
+    $status_aktif = (int) ($_POST['status_aktif'] ?? 1);
+
+    if (
+        $nis === '' ||
+        $nisn === '' ||
+        $nama === '' ||
+        !in_array($jenis_kelamin, ['L', 'P'], true) ||
+        $tanggal_lahir === '' ||
+        !in_array($status_aktif, [0, 1], true)
+    ) {
+        $error = "Semua data wajib diisi dengan benar.";
     } else {
 
-        echo "Data gagal diubah: " . mysqli_error($koneksi);
+        $stmt = mysqli_prepare($koneksi, "
+            UPDATE t_siswa SET
+                nis = ?,
+                nisn = ?,
+                nama = ?,
+                jenis_kelamin = ?,
+                tanggal_lahir = ?,
+                alamat = ?,
+                status_aktif = ?
+            WHERE id = ?
+        ");
 
+        mysqli_stmt_bind_param(
+            $stmt,
+            "ssssssii",
+            $nis,
+            $nisn,
+            $nama,
+            $jenis_kelamin,
+            $tanggal_lahir,
+            $alamat,
+            $status_aktif,
+            $id
+        );
+
+        if (mysqli_stmt_execute($stmt)) {
+
+            mysqli_stmt_close($stmt);
+
+            header("Location: data_siswa.php");
+            exit;
+
+        } else {
+
+            $error = "Gagal mengubah data: " . mysqli_stmt_error($stmt);
+            mysqli_stmt_close($stmt);
+        }
     }
+
+    // Menampilkan kembali input jika terjadi kesalahan
+    $data['nis'] = $nis;
+    $data['nisn'] = $nisn;
+    $data['nama'] = $nama;
+    $data['jenis_kelamin'] = $jenis_kelamin;
+    $data['tanggal_lahir'] = $tanggal_lahir;
+    $data['alamat'] = $alamat;
+    $data['status_aktif'] = $status_aktif;
 }
 ?>
 
@@ -53,263 +108,170 @@ if (isset($_POST['update'])) {
 <html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>Edit Siswa</title>
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet">
 </head>
 
-<body>
+<body class="bg-light">
 
 <div class="d-flex">
 
-    <!-- SIDEBAR -->
-    <div class="bg-dark text-white p-3 min-vh-100"
-         style="width: 230px;">
+    <!-- SIDEBAR LENGKAP -->
+    <?php include 'layout/sidebar.php'; ?>
+
+    <!-- KONTEN UTAMA -->
+    <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
+
+        <div class="container-fluid">
+
+            <h2 class="mb-1">Edit Siswa</h2>
+
+            <p class="text-muted mb-4">
+                Ubah data siswa.
+            </p>
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-white py-3">
+                    <strong>Form Edit Siswa</strong>
+                </div>
+
+                <div class="card-body">
+
+                    <?php if ($error !== ''): ?>
+                        <div class="alert alert-danger">
+                            <?= htmlspecialchars($error) ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <form method="POST"
+                          action="edit_siswa.php?id=<?= $id ?>">
+
+                        <!-- NIS -->
+                        <div class="mb-3">
+                            <label class="form-label">NIS</label>
+
+                            <input type="text"
+                                   name="nis"
+                                   class="form-control"
+                                   value="<?= htmlspecialchars($data['nis'] ?? '') ?>"
+                                   required>
+                        </div>
+
+                        <!-- NISN -->
+                        <div class="mb-3">
+                            <label class="form-label">NISN</label>
+
+                            <input type="text"
+                                   name="nisn"
+                                   class="form-control"
+                                   value="<?= htmlspecialchars($data['nisn'] ?? '') ?>"
+                                   required>
+                        </div>
+
+                        <!-- NAMA -->
+                        <div class="mb-3">
+                            <label class="form-label">Nama Siswa</label>
+
+                            <input type="text"
+                                   name="nama"
+                                   class="form-control"
+                                   value="<?= htmlspecialchars($data['nama'] ?? '') ?>"
+                                   required>
+                        </div>
+
+                        <!-- JENIS KELAMIN -->
+                        <div class="mb-3">
+                            <label class="form-label">Jenis Kelamin</label>
+
+                            <select name="jenis_kelamin"
+                                    class="form-select"
+                                    required>
+
+                                <option value="L"
+                                    <?= ($data['jenis_kelamin'] ?? '') === 'L' ? 'selected' : '' ?>>
+                                    Laki-laki
+                                </option>
+
+                                <option value="P"
+                                    <?= ($data['jenis_kelamin'] ?? '') === 'P' ? 'selected' : '' ?>>
+                                    Perempuan
+                                </option>
+
+                            </select>
+                        </div>
+
+                        <!-- TANGGAL LAHIR -->
+                        <div class="mb-3">
+                            <label class="form-label">Tanggal Lahir</label>
+
+                            <input type="date"
+                                   name="tanggal_lahir"
+                                   class="form-control"
+                                   value="<?= htmlspecialchars($data['tanggal_lahir'] ?? '') ?>"
+                                   required>
+                        </div>
+
+                        <!-- ALAMAT -->
+                        <div class="mb-3">
+                            <label class="form-label">Alamat</label>
+
+                            <textarea name="alamat"
+                                      class="form-control"
+                                      rows="3"><?= htmlspecialchars($data['alamat'] ?? '') ?></textarea>
+                        </div>
 
-        <h4 class="mb-4">
-            My Website
-        </h4>
+                        <!-- STATUS -->
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
 
-        <div class="nav flex-column">
+                            <select name="status_aktif"
+                                    class="form-select"
+                                    required>
 
-            <a href="dashboard.php"
-               class="nav-link text-white mb-2">
-                Dashboard
-            </a>
+                                <option value="1"
+                                    <?= (int)$data['status_aktif'] === 1 ? 'selected' : '' ?>>
+                                    Aktif
+                                </option>
 
-            <a href="data_siswa.php"
-               class="nav-link active bg-primary rounded mb-2">
-                Data Siswa
-            </a>
+                                <option value="0"
+                                    <?= (int)$data['status_aktif'] === 0 ? 'selected' : '' ?>>
+                                    Tidak Aktif
+                                </option>
 
-            <a href="data_guru.php"
-               class="nav-link text-white mb-2">
-                Data Guru
-            </a>
+                            </select>
+                        </div>
 
-            <a href="kelas.php"
-               class="nav-link text-white mb-2">
-                Kelas
-            </a>
+                        <!-- TOMBOL -->
+                        <div class="d-flex gap-2">
 
-            <a href="laporan.php"
-               class="nav-link text-white mb-2">
-                Laporan
-            </a>
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                Simpan Perubahan
+                            </button>
 
-            <a href="about.php"
-               class="nav-link text-white mb-4">
-                About Me
-            </a>
+                            <a href="data_siswa.php"
+                               class="btn btn-secondary">
+                                Kembali
+                            </a>
 
-            <hr>
+                        </div>
 
-            <a href="logout.php"
-               class="nav-link text-danger">
-                Logout
-            </a>
+                    </form>
 
-        </div>
-
-    </div>
-
-
-    <!-- CONTENT -->
-    <div class="flex-grow-1 p-4">
-
-        <h2>Edit Siswa</h2>
-
-        <p class="text-muted">
-            Ubah data siswa
-        </p>
-
-        <div class="card">
-
-            <div class="card-header">
-
-                <strong>
-                    Form Edit Siswa
-                </strong>
-
-            </div>
-
-            <div class="card-body">
-
-                <form method="POST">
-
-                    <!-- NIS -->
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            NIS
-                        </label>
-
-                        <input
-                            type="text"
-                            name="nis"
-                            class="form-control"
-                            value="<?= htmlspecialchars($data['nis']); ?>"
-                            required>
-
-                    </div>
-
-
-                    <!-- NISN -->
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            NISN
-                        </label>
-
-                        <input
-                            type="text"
-                            name="nisn"
-                            class="form-control"
-                            value="<?= htmlspecialchars($data['nisn']); ?>"
-                            required>
-
-                    </div>
-
-
-                    <!-- NAMA -->
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Nama Siswa
-                        </label>
-
-                        <input
-                            type="text"
-                            name="nama"
-                            class="form-control"
-                            value="<?= htmlspecialchars($data['nama']); ?>"
-                            required>
-
-                    </div>
-
-
-                    <!-- JENIS KELAMIN -->
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Jenis Kelamin
-                        </label>
-
-                        <select
-                            name="jenis_kelamin"
-                            class="form-select"
-                            required>
-
-                            <option value="L"
-                                <?= $data['jenis_kelamin'] == 'L' ? 'selected' : ''; ?>>
-                                Laki-laki
-                            </option>
-
-                            <option value="P"
-                                <?= $data['jenis_kelamin'] == 'P' ? 'selected' : ''; ?>>
-                                Perempuan
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- TANGGAL LAHIR -->
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Tanggal Lahir
-                        </label>
-
-                        <input
-                            type="date"
-                            name="tanggal_lahir"
-                            class="form-control"
-                            value="<?= $data['tanggal_lahir']; ?>"
-                            required>
-
-                    </div>
-
-
-                    <!-- ALAMAT -->
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Alamat
-                        </label>
-
-                        <textarea
-                            name="alamat"
-                            class="form-control"
-                            rows="3"><?= htmlspecialchars($data['alamat']); ?></textarea>
-
-                    </div>
-
-
-                    <!-- STATUS -->
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Status
-                        </label>
-
-                        <select
-                            name="status_aktif"
-                            class="form-select"
-                            required>
-
-                            <option value="1"
-                                <?= $data['status_aktif'] == 1 ? 'selected' : ''; ?>>
-                                Aktif
-                            </option>
-
-                            <option value="0"
-                                <?= $data['status_aktif'] == 0 ? 'selected' : ''; ?>>
-                                Tidak Aktif
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- BUTTON -->
-                    <div class="d-flex gap-2">
-
-                        <button
-                            type="submit"
-                            name="update"
-                            class="btn btn-primary">
-                            Update
-                        </button>
-
-                        <a
-                            href="data_siswa.php"
-                            class="btn btn-secondary">
-                            Kembali
-                        </a>
-
-                    </div>
-
-                </form>
-
+                </div>
             </div>
 
         </div>
 
-    </div>
+    </main>
 
 </div>
 
 </body>
-
 </html>

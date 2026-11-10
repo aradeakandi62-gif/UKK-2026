@@ -7,21 +7,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
             position-fixed top-0 start-0 vh-100
             overflow-y-auto z-3">
 
-    <h4 class="text-white mb-4">My Website</h4>
+    <h4 class="text-white mb-4">Pelanggaran Siswa</h4>
 
     <ul class="nav nav-pills flex-column">
 
         <li class="nav-item mb-2">
             <a href="dashboard_guru.php"
                class="nav-link <?= ($current_page == 'dashboard_guru.php') ? 'active' : 'text-white' ?>">
-                Dashboard Guru
-            </a>
-        </li>
-
-        <li class="nav-item mb-2">
-            <a href="data_siswa.php"
-               class="nav-link <?= ($current_page == 'data_siswa.php') ? 'active' : 'text-white' ?>">
-                Data Siswa
+                Dashboard 
             </a>
         </li>
 
@@ -33,9 +26,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </li>
 
         <li class="nav-item mb-2">
-            <a href="wali_kelas.php"
-               class="nav-link <?= ($current_page == 'wali_kelas.php') ? 'active' : 'text-white' ?>">
-                Wali Kelas
+            <a href="riwayat_pelanggaran.php"
+               class="nav-link <?= ($current_page == 'riwayat_pelanggaran.php') ? 'active' : 'text-white' ?>">
+                riwayat pelanggaran
             </a>
         </li>
 

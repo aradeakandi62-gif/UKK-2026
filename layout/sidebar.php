@@ -16,7 +16,7 @@ $dashboard = ($role === 'guru') ? 'dashboard_guru.php' : 'dashboard.php';
             overflow-y-auto z-3">
 
     <h4 class="text-white mb-4">
-        My Website
+        ⚙️Sistem Sekolah
     </h4>
 
     <ul class="nav nav-pills flex-column">
@@ -97,7 +97,7 @@ $dashboard = ($role === 'guru') ? 'dashboard_guru.php' : 'dashboard.php';
             </li>
 
             <li class="nav-item mb-2">
-                <a href="about.php"
+                <a href="about_me.php"
                    class="nav-link <?= ($current_page == 'about.php') ? 'active' : 'text-white' ?>">
                     About Me
                 </a>

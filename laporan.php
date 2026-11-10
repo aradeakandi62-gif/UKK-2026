@@ -20,7 +20,10 @@ function hitungData($koneksi, $tabel) {
         return 0;
     }
 
-    $query = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM `$tabel`");
+    $query = mysqli_query(
+        $koneksi,
+        "SELECT COUNT(*) AS total FROM `$tabel`"
+    );
 
     if (!$query) {
         return 0;
@@ -34,6 +37,10 @@ $totalSiswa = hitungData($koneksi, 't_siswa');
 $totalGuru = hitungData($koneksi, 't_guru');
 $totalKelas = hitungData($koneksi, 't_kelas');
 $totalPelanggaran = hitungData($koneksi, 't_pelanggaran');
+
+$halamanDashboard = ($_SESSION['role'] === 'guru')
+    ? 'dashboard_guru.php'
+    : 'dashboard.php';
 ?>
 
 <!DOCTYPE html>
@@ -49,22 +56,26 @@ $totalPelanggaran = hitungData($koneksi, 't_pelanggaran');
 
 <body>
 
-<div class="d-flex">
+<!-- TAMPILAN WEBSITE -->
+<div class="d-flex d-print-none">
+
     <?php
-if ($_SESSION['role'] == 'guru') {
-    include 'layout/sidebar_guru.php';
-} else {
-    include 'layout/sidebar.php';
-}
-?>
+    if ($_SESSION['role'] === 'guru') {
+        include 'layout/sidebar_guru.php';
+    } else {
+        include 'layout/sidebar.php';
+    }
+    ?>
 
     <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
         <h2>Laporan</h2>
+
         <p class="text-muted">
             Ringkasan data Aplikasi Pelanggaran Siswa
         </p>
 
+        <!-- KARTU JUMLAH DATA -->
         <div class="row g-3 mb-4">
 
             <div class="col-md-6 col-xl-3">
@@ -105,12 +116,14 @@ if ($_SESSION['role'] == 'guru') {
 
         </div>
 
+        <!-- TABEL LAPORAN -->
         <div class="card">
             <div class="card-header">
                 <strong>Ringkasan Laporan</strong>
             </div>
 
             <div class="card-body">
+
                 <table class="table table-bordered table-striped">
                     <thead class="table-dark">
                         <tr>
@@ -126,16 +139,19 @@ if ($_SESSION['role'] == 'guru') {
                             <td>Data Siswa</td>
                             <td><?= $totalSiswa; ?> siswa</td>
                         </tr>
+
                         <tr>
                             <td>2</td>
                             <td>Data Guru</td>
                             <td><?= $totalGuru; ?> guru</td>
                         </tr>
+
                         <tr>
                             <td>3</td>
                             <td>Data Kelas</td>
                             <td><?= $totalKelas; ?> kelas</td>
                         </tr>
+
                         <tr>
                             <td>4</td>
                             <td>Data Pelanggaran</td>
@@ -150,13 +166,63 @@ if ($_SESSION['role'] == 'guru') {
                     Cetak Laporan
                 </button>
 
-                <a href="dashboard.php" class="btn btn-secondary">
+                <a href="<?= $halamanDashboard ?>"
+                   class="btn btn-secondary">
                     Kembali
                 </a>
+
             </div>
         </div>
 
     </main>
+</div>
+
+
+<!-- KHUSUS TAMPILAN CETAK -->
+<div class="d-none d-print-block">
+
+    <div class="container-fluid p-3">
+
+        <h4 class="fw-bold mb-3">Ringkasan Laporan</h4>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width: 10%;">No</th>
+                    <th>Jenis Data</th>
+                    <th>Jumlah</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Data Siswa</td>
+                    <td><?= $totalSiswa; ?> siswa</td>
+                </tr>
+
+                <tr>
+                    <td>2</td>
+                    <td>Data Guru</td>
+                    <td><?= $totalGuru; ?> guru</td>
+                </tr>
+
+                <tr>
+                    <td>3</td>
+                    <td>Data Kelas</td>
+                    <td><?= $totalKelas; ?> kelas</td>
+                </tr>
+
+                <tr>
+                    <td>4</td>
+                    <td>Data Pelanggaran</td>
+                    <td><?= $totalPelanggaran; ?> pelanggaran</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
 </div>
 
 </body>
