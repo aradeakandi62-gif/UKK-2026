@@ -1,20 +1,47 @@
-```php
+
 <?php
 session_start();
 
 include 'config/koneksi.php';
 include 'includes/cek_session.php';
 
-// Mengambil informasi guru yang sedang login
-$nama_guru = $_SESSION['name'] ?? '';
-
-// Pastikan hanya guru yang mengakses halaman ini
-if (strtolower($_SESSION['role'] ?? '') !== 'guru') {
+// Pastikan hanya guru yang bisa mengakses
+if (strtolower(trim($_SESSION['role'] ?? '')) !== 'guru') {
     header("Location: dashboard.php");
     exit;
 }
 
-// Mengambil riwayat pelanggaran berdasarkan nama guru
+// ID akun yang sedang login (t_users.id)
+$user_id = (int)($_SESSION['id'] ?? 0);
+
+// Cari ID guru berdasarkan user_id
+$stmtGuru = mysqli_prepare($koneksi, "
+    SELECT id, nama
+    FROM t_guru
+    WHERE user_id = ?
+    LIMIT 1
+");
+
+if (!$stmtGuru) {
+    die("Query guru gagal: " . mysqli_error($koneksi));
+}
+
+mysqli_stmt_bind_param($stmtGuru, "i", $user_id);
+mysqli_stmt_execute($stmtGuru);
+
+$resultGuru = mysqli_stmt_get_result($stmtGuru);
+$dataGuru = mysqli_fetch_assoc($resultGuru);
+
+mysqli_stmt_close($stmtGuru);
+
+// Pastikan akun terhubung dengan data guru
+if (!$dataGuru) {
+    die("Data guru tidak ditemukan. Pastikan t_guru.user_id sesuai dengan akun login.");
+}
+
+$guru_id = (int)$dataGuru['id'];
+
+// Ambil riwayat berdasarkan guru_id
 $stmt = mysqli_prepare($koneksi, "
     SELECT
         id,
@@ -27,21 +54,28 @@ $stmt = mysqli_prepare($koneksi, "
         tindakan,
         status
     FROM t_pelanggaran_siswa
-    WHERE nama_guru = ?
+    WHERE guru_id = ?
     ORDER BY tanggal DESC, id DESC
 ");
 
 if (!$stmt) {
-    die("Query gagal: " . mysqli_error($koneksi));
+    die("Query riwayat gagal: " . mysqli_error($koneksi));
 }
 
-mysqli_stmt_bind_param($stmt, "s", $nama_guru);
+mysqli_stmt_bind_param($stmt, "i", $guru_id);
 mysqli_stmt_execute($stmt);
 
 $result = mysqli_stmt_get_result($stmt);
 
-// Menghitung jumlah riwayat
 $totalRiwayat = mysqli_num_rows($result);
+
+function e($value) {
+    return htmlspecialchars(
+        (string)($value ?? ''),
+        ENT_QUOTES,
+        'UTF-8'
+    );
+}
 ?>
 
 <!DOCTYPE html>
@@ -52,11 +86,9 @@ $totalRiwayat = mysqli_num_rows($result);
 
     <title>Riwayat Pelanggaran</title>
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
           rel="stylesheet">
 
-    <!-- DataTables -->
     <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
           rel="stylesheet">
 </head>
@@ -65,24 +97,22 @@ $totalRiwayat = mysqli_num_rows($result);
 
 <div class="d-flex">
 
-    <!-- SIDEBAR GURU -->
     <?php include 'layout/sidebar_guru.php'; ?>
 
-    <!-- KONTEN UTAMA -->
     <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
         <div class="container-fluid">
 
-            <!-- JUDUL -->
             <div class="mb-4">
                 <h3 class="fw-bold">Riwayat Pelanggaran</h3>
 
-                <p class="text-muted mb-0">
-                    Daftar riwayat pelanggaran siswa yang telah dicatat.
+                <p class="text-muted">
+                    Daftar riwayat pelanggaran siswa yang telah dicatat oleh
+                    <?= e($dataGuru['nama']) ?>.
                 </p>
             </div>
 
-            <!-- INFORMASI JUMLAH -->
+            <!-- TOTAL RIWAYAT -->
             <div class="row mb-4">
 
                 <div class="col-md-4">
@@ -149,61 +179,54 @@ $totalRiwayat = mysqli_num_rows($result);
                                 while ($row = mysqli_fetch_assoc($result)):
                                 ?>
 
-                                    <tr>
+                                <tr>
 
-                                        <td><?= $no++ ?></td>
+                                    <td><?= $no++ ?></td>
 
-                                        <td>
-                                            <?= htmlspecialchars($row['nama_siswa']) ?>
-                                        </td>
+                                    <td><?= e($row['nama_siswa']) ?></td>
 
-                                        <td>
-                                            <?= htmlspecialchars($row['nama_kelas']) ?>
-                                        </td>
+                                    <td><?= e($row['nama_kelas']) ?></td>
 
-                                        <td>
-                                            <?= htmlspecialchars($row['nama_pelanggaran']) ?>
-                                        </td>
+                                    <td><?= e($row['nama_pelanggaran']) ?></td>
 
-                                        <td>
-                                            <?= !empty($row['tanggal'])
-                                                ? date('d-m-Y', strtotime($row['tanggal']))
-                                                : '-' ?>
-                                        </td>
+                                    <td>
+                                        <?= !empty($row['tanggal'])
+                                            ? date('d-m-Y', strtotime($row['tanggal']))
+                                            : '-' ?>
+                                    </td>
 
-                                        <td>
-                                            <span class="badge bg-danger">
-                                                <?= (int)$row['poin'] ?> Poin
-                                            </span>
-                                        </td>
+                                    <td>
+                                        <span class="badge bg-danger">
+                                            <?= (int)$row['poin'] ?> Poin
+                                        </span>
+                                    </td>
 
-                                        <td>
-                                            <?= htmlspecialchars($row['keterangan']) ?>
-                                        </td>
+                                    <td><?= e($row['keterangan']) ?></td>
 
-                                        <td>
-                                            <?= htmlspecialchars($row['tindakan']) ?>
-                                        </td>
+                                    <td><?= e($row['tindakan']) ?></td>
 
-                                        <td>
-                                            <?php
-                                            $status = strtolower(trim($row['status']));
+                                    <td>
+                                        <?php
+                                        $status = strtolower(trim($row['status']));
 
-                                            if ($status === 'selesai') {
-                                                $warna = 'success';
-                                            } elseif ($status === 'diproses') {
-                                                $warna = 'warning';
-                                            } else {
-                                                $warna = 'secondary';
-                                            }
-                                            ?>
+                                        if ($status === 'selesai') {
+                                            $warna = 'success';
+                                        } elseif (
+                                            $status === 'diproses' ||
+                                            $status === 'ditindaklanjuti'
+                                        ) {
+                                            $warna = 'warning';
+                                        } else {
+                                            $warna = 'secondary';
+                                        }
+                                        ?>
 
-                                            <span class="badge bg-<?= $warna ?>">
-                                                <?= htmlspecialchars($row['status']) ?>
-                                            </span>
-                                        </td>
+                                        <span class="badge bg-<?= $warna ?>">
+                                            <?= e($row['status']) ?>
+                                        </span>
+                                    </td>
 
-                                    </tr>
+                                </tr>
 
                                 <?php endwhile; ?>
 
@@ -213,14 +236,10 @@ $totalRiwayat = mysqli_num_rows($result);
 
                     </div>
 
-                    <div class="mt-3">
-
-                        <a href="dashboard_guru.php"
-                           class="btn btn-secondary">
-                            Kembali ke Dashboard
-                        </a>
-
-                    </div>
+                    <a href="dashboard_guru.php"
+                       class="btn btn-secondary mt-3">
+                        Kembali ke Dashboard
+                    </a>
 
                 </div>
 
@@ -232,11 +251,10 @@ $totalRiwayat = mysqli_num_rows($result);
 
 </div>
 
-<!-- JQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<!-- DataTables -->
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
@@ -274,4 +292,3 @@ $(document).ready(function () {
 <?php
 mysqli_stmt_close($stmt);
 ?>
-```
