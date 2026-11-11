@@ -3,10 +3,31 @@
 session_start();
 
 include "config/koneksi.php";
-include "includes/cek_admin.php";
+include "includes/cek_session.php";
 
 // ==================================
-// MENGAMBIL JUMLAH DATA DARI DATABASE
+// MENGAMBIL ROLE PENGGUNA
+// ==================================
+
+$role = strtolower(trim($_SESSION['role'] ?? ''));
+$nama_user = $_SESSION['name'] ?? 'Pengguna';
+
+if (!in_array($role, ['admin', 'guru', 'wali_kelas'], true)) {
+    header("Location: login.php");
+    exit;
+}
+
+// Menentukan sapaan
+if ($role === 'admin') {
+    $sapaan = 'Administrator';
+} elseif ($role === 'wali_kelas') {
+    $sapaan = 'Wali Kelas';
+} else {
+    $sapaan = 'Guru';
+}
+
+// ==================================
+// MENGAMBIL JUMLAH DATA
 // ==================================
 
 // Jumlah siswa
@@ -21,7 +42,6 @@ if (!$query_siswa) {
 $data_siswa = mysqli_fetch_assoc($query_siswa);
 $total_siswa = $data_siswa['total'];
 
-
 // Jumlah guru
 $query_guru = mysqli_query($koneksi, "
     SELECT COUNT(*) AS total FROM t_guru
@@ -34,7 +54,6 @@ if (!$query_guru) {
 $data_guru = mysqli_fetch_assoc($query_guru);
 $total_guru = $data_guru['total'];
 
-
 // Jumlah kelas
 $query_kelas = mysqli_query($koneksi, "
     SELECT COUNT(*) AS total FROM t_kelas
@@ -46,6 +65,18 @@ if (!$query_kelas) {
 
 $data_kelas = mysqli_fetch_assoc($query_kelas);
 $total_kelas = $data_kelas['total'];
+
+// Jumlah pelanggaran
+$query_pelanggaran = mysqli_query($koneksi, "
+    SELECT COUNT(*) AS total FROM t_pelanggaran_siswa
+");
+
+if (!$query_pelanggaran) {
+    die("Query pelanggaran gagal: " . mysqli_error($koneksi));
+}
+
+$data_pelanggaran = mysqli_fetch_assoc($query_pelanggaran);
+$total_pelanggaran = $data_pelanggaran['total'];
 
 ?>
 
@@ -75,138 +106,252 @@ $total_kelas = $data_kelas['total'];
             <!-- JUDUL -->
             <div class="mb-4">
                 <h2>Dashboard</h2>
+
                 <p class="text-muted">
-                    Selamat Datang Administator.
+                    Selamat Datang <?= htmlspecialchars($sapaan); ?>.
                 </p>
+
+                <small class="text-secondary">
+                    <?= htmlspecialchars($nama_user); ?>
+                </small>
             </div>
 
-            <!-- KARTU STATISTIK -->
-            <div class="row g-3">
+            <?php if ($role === 'admin'): ?>
 
-                <!-- DATA SISWA -->
-                <div class="col-md-4">
-                    <a href="data_siswa.php" class="text-decoration-none text-dark">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body">
-                                <h5>Data Siswa</h5>
+                <!-- ==================================
+                     DASHBOARD ADMIN
+                ================================== -->
 
-                                <h3>
-                                    <?= $total_siswa; ?>
-                                </h3>
+                <!-- KARTU STATISTIK -->
+                <div class="row g-3">
 
-                                <span class="text-primary">
-                                    Lihat Data Siswa 👥
-                                </span>
+                    <!-- DATA SISWA -->
+                    <div class="col-md-4">
+                        <a href="data_siswa.php" class="text-decoration-none text-dark">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body">
+                                    <h5>Data Siswa</h5>
+                                    <h3><?= $total_siswa; ?></h3>
+
+                                    <span class="text-primary">
+                                        Lihat Data Siswa 👥
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
+
+                    <!-- DATA GURU -->
+                    <div class="col-md-4">
+                        <a href="data_guru.php" class="text-decoration-none text-dark">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body">
+                                    <h5>Data Guru</h5>
+                                    <h3><?= $total_guru; ?></h3>
+
+                                    <span class="text-primary">
+                                        Lihat Data Guru 🧑‍🏫
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- DATA KELAS -->
+                    <div class="col-md-4">
+                        <a href="data_kelas.php" class="text-decoration-none text-dark">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body">
+                                    <h5>Kelas</h5>
+                                    <h3><?= $total_kelas; ?></h3>
+
+                                    <span class="text-primary">
+                                        Lihat Data Kelas 🏫
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
                 </div>
 
-                <!-- DATA GURU -->
-                <div class="col-md-4">
-                    <a href="data_guru.php" class="text-decoration-none text-dark">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body">
-                                <h5>Data Guru</h5>
+                <!-- MENU AKSES CEPAT ADMIN -->
+                <div class="mt-5">
 
-                                <h3>
-                                    <?= $total_guru; ?>
-                                </h3>
+                    <h4 class="mb-3">Menu Akses Cepat</h4>
 
-                                <span class="text-primary">
-                                    Lihat Data Guru 🧑‍🏫
-                                </span>
-                            </div>
+                    <div class="row g-3">
+
+                        <div class="col-md-3">
+                            <a href="penempatan_siswa.php" class="text-decoration-none">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h2>📚</h2>
+                                        <h6 class="text-dark">Penempatan Siswa</h6>
+                                        <small class="text-muted">
+                                            Kelola penempatan kelas siswa
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
                         </div>
-                    </a>
+
+                        <div class="col-md-3">
+                            <a href="wali_kelas.php" class="text-decoration-none">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h2>👨‍🏫</h2>
+                                        <h6 class="text-dark">Wali Kelas</h6>
+                                        <small class="text-muted">
+                                            Kelola data wali kelas
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-md-3">
+                            <a href="kategori_pelanggaran.php" class="text-decoration-none">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h2>📋</h2>
+                                        <h6 class="text-dark">Kategori Pelanggaran</h6>
+                                        <small class="text-muted">
+                                            Kelola kategori pelanggaran
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-md-3">
+                            <a href="jenis_pelanggaran.php" class="text-decoration-none">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h2>📝</h2>
+                                        <h6 class="text-dark">Jenis Pelanggaran</h6>
+                                        <small class="text-muted">
+                                            Kelola jenis pelanggaran
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                    </div>
                 </div>
 
-                <!-- DATA KELAS -->
-                <div class="col-md-4">
-                    <a href="data_kelas.php" class="text-decoration-none text-dark">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body">
-                                <h5>Kelas</h5>
+            <?php else: ?>
 
-                                <h3>
-                                    <?= $total_kelas; ?>
-                                </h3>
-
-                                <span class="text-primary">
-                                    Lihat Data Kelas 🏫
-                                </span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-            </div>
-
-            <!-- MENU AKSES CEPAT -->
-            <div class="mt-5">
-
-                <h4 class="mb-3">Menu Akses Cepat</h4>
+                <!-- ==================================
+                     DASHBOARD GURU DAN WALI KELAS
+                ================================== -->
 
                 <div class="row g-3">
 
-                    <div class="col-md-3">
-                        <a href="penempatan_siswa.php" class="text-decoration-none">
+                    <!-- DATA SISWA -->
+                    <div class="col-md-4">
+                        <a href="data_siswa.php" class="text-decoration-none text-dark">
                             <div class="card shadow-sm h-100">
                                 <div class="card-body">
-                                    <h2>📚</h2>
-                                    <h6 class="text-dark">Penempatan Siswa</h6>
-                                    <small class="text-muted">
-                                        Kelola penempatan kelas siswa
-                                    </small>
+                                    <h5>Data Siswa</h5>
+                                    <h3><?= $total_siswa; ?></h3>
+
+                                    <span class="text-primary">
+                                        Lihat Data Siswa 👥
+                                    </span>
                                 </div>
                             </div>
                         </a>
                     </div>
 
-                    <div class="col-md-3">
-                        <a href="wali_kelas.php" class="text-decoration-none">
+                    <!-- CATAT PELANGGARAN -->
+                    <div class="col-md-4">
+                        <a href="catat_pelanggaran.php" class="text-decoration-none text-dark">
                             <div class="card shadow-sm h-100">
                                 <div class="card-body">
-                                    <h2>👨‍🏫</h2>
-                                    <h6 class="text-dark">Wali Kelas</h6>
-                                    <small class="text-muted">
-                                        Kelola data wali kelas
-                                    </small>
+                                    <h5>Catat Pelanggaran</h5>
+                                    <h3>📝</h3>
+
+                                    <span class="text-primary">
+                                        Catat Pelanggaran Siswa
+                                    </span>
                                 </div>
                             </div>
                         </a>
                     </div>
 
-                    <div class="col-md-3">
-                        <a href="kategori_pelanggaran.php" class="text-decoration-none">
+                    <!-- TOTAL PELANGGARAN -->
+                    <div class="col-md-4">
+                        <a href="riwayat_pelanggaran.php" class="text-decoration-none text-dark">
                             <div class="card shadow-sm h-100">
                                 <div class="card-body">
-                                    <h2>📋</h2>
-                                    <h6 class="text-dark">Kategori Pelanggaran</h6>
-                                    <small class="text-muted">
-                                        Kelola kategori pelanggaran
-                                    </small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+                                    <h5>Total Pelanggaran</h5>
+                                    <h3><?= $total_pelanggaran; ?></h3>
 
-                    <div class="col-md-3">
-                        <a href="jenis_pelanggaran.php" class="text-decoration-none">
-                            <div class="card shadow-sm h-100">
-                                <div class="card-body">
-                                    <h2>📝</h2>
-                                    <h6 class="text-dark">Jenis Pelanggaran</h6>
-                                    <small class="text-muted">
-                                        Kelola jenis pelanggaran
-                                    </small>
+                                    <span class="text-primary">
+                                        Lihat Riwayat Pelanggaran
+                                    </span>
                                 </div>
                             </div>
                         </a>
                     </div>
 
                 </div>
-            </div>
+
+                <!-- MENU AKSES CEPAT GURU -->
+                <div class="mt-5">
+
+                    <h4 class="mb-3">Menu Akses Cepat</h4>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <a href="tindakan_pelanggaran.php" class="text-decoration-none">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h2>📋</h2>
+                                        <h6 class="text-dark">Tindakan</h6>
+                                        <small class="text-muted">
+                                            Lihat tindakan pelanggaran siswa
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-md-4">
+                            <a href="rekap_poin.php" class="text-decoration-none">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h2>📊</h2>
+                                        <h6 class="text-dark">Rekap Poin</h6>
+                                        <small class="text-muted">
+                                            Lihat rekap poin siswa
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-md-4">
+                            <a href="riwayat_pelanggaran.php" class="text-decoration-none">
+                                <div class="card shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h2>📚</h2>
+                                        <h6 class="text-dark">Riwayat</h6>
+                                        <small class="text-muted">
+                                            Lihat riwayat pelanggaran
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+            <?php endif; ?>
 
             <!-- INFORMASI SISTEM -->
             <div class="row g-3 mt-4">
@@ -254,30 +399,61 @@ $total_kelas = $data_kelas['total'];
 
                             <ul class="list-group list-group-flush">
 
-                                <li class="list-group-item">
-                                    <span class="text-success">✓</span>
-                                    Pengelolaan Data Siswa
-                                </li>
+                                <?php if ($role === 'admin'): ?>
 
-                                <li class="list-group-item">
-                                    <span class="text-success">✓</span>
-                                    Pengelolaan Data Guru
-                                </li>
+                                    <li class="list-group-item">
+                                        <span class="text-success">✓</span>
+                                        Pengelolaan Data Siswa
+                                    </li>
 
-                                <li class="list-group-item">
-                                    <span class="text-success">✓</span>
-                                    Pengelolaan Data Kelas
-                                </li>
+                                    <li class="list-group-item">
+                                        <span class="text-success">✓</span>
+                                        Pengelolaan Data Guru
+                                    </li>
 
-                                <li class="list-group-item">
-                                    <span class="text-success">✓</span>
-                                    Pengelolaan Tahun Ajaran
-                                </li>
+                                    <li class="list-group-item">
+                                        <span class="text-success">✓</span>
+                                        Pengelolaan Data Kelas
+                                    </li>
 
-                                <li class="list-group-item">
-                                    <span class="text-success">✓</span>
-                                    Laporan Sekolah
-                                </li>
+                                    <li class="list-group-item">
+                                        <span class="text-success">✓</span>
+                                        Pengelolaan Tahun Ajaran
+                                    </li>
+
+                                    <li class="list-group-item">
+                                        <span class="text-success">✓</span>
+                                        Laporan Sekolah
+                                    </li>
+
+                                <?php else: ?>
+
+                                    <li class="list-group-item">
+                                        <span class="text-success">✓</span>
+                                        Melihat Data Siswa
+                                    </li>
+
+                                    <li class="list-group-item">
+                                        <span class="text-success">✓</span>
+                                        Mencatat Pelanggaran Siswa
+                                    </li>
+
+                                    <li class="list-group-item">
+                                        <span class="text-success">✓</span>
+                                        Melihat Tindakan Pelanggaran
+                                    </li>
+
+                                    <li class="list-group-item">
+                                        <span class="text-success">✓</span>
+                                        Melihat Riwayat Pelanggaran
+                                    </li>
+
+                                    <li class="list-group-item">
+                                        <span class="text-success">✓</span>
+                                        Melihat Rekap Poin
+                                    </li>
+
+                                <?php endif; ?>
 
                             </ul>
 
@@ -290,6 +466,7 @@ $total_kelas = $data_kelas['total'];
             <!-- FOOTER -->
             <div class="text-center text-muted mt-5 mb-3">
                 <hr>
+
                 <small>
                     &copy; <?= date('Y'); ?> UKK-2026.
                     Sistem Informasi Manajemen Sekolah.

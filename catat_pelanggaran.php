@@ -9,7 +9,7 @@ include 'includes/cek_session.php';
 // CEK LOGIN GURU
 // =====================================
 
-if (strtolower(trim($_SESSION['role'] ?? '')) !== 'guru') {
+if (!in_array(strtolower(trim($_SESSION['role'] ?? '')), ['guru', 'wali_kelas'], true)) {
     header("Location: dashboard.php");
     exit;
 }
@@ -135,8 +135,11 @@ $siswa_id = 0;
 $pelanggaran_id = 0;
 $tanggal = date('Y-m-d');
 $keterangan = '';
+
+// Status awal selalu Pending.
+// Tindakan akan diisi melalui halaman Tindakan Pelanggaran.
 $tindakan = '';
-$status = 'tercatat';
+$status = 'Pending';
 
 // =====================================
 // PROSES SIMPAN
@@ -145,16 +148,13 @@ $status = 'tercatat';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $siswa_id = (int)($_POST['siswa_id'] ?? 0);
-
     $pelanggaran_id = (int)($_POST['pelanggaran_id'] ?? 0);
-
     $tanggal = trim($_POST['tanggal'] ?? '');
-
     $keterangan = trim($_POST['keterangan'] ?? '');
 
-    $tindakan = trim($_POST['tindakan'] ?? '');
-
-    $status = trim($_POST['status'] ?? '');
+    // Tindakan dan status ditentukan otomatis.
+    $tindakan = '';
+    $status = 'Pending';
 
     // Cari data asli berdasarkan ID
     $siswa = cariData($siswaData, $siswa_id);
@@ -164,28 +164,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pelanggaran_id
     );
 
-    $daftarStatus = [
-        'tercatat',
-        'ditindaklanjuti',
-        'selesai'
-    ];
-
     // Validasi
     if (!$siswa) {
 
         $error = "Silakan pilih siswa yang memiliki penempatan kelas dan tahun ajaran.";
 
+    } elseif (
+        empty($siswa['kelas_id']) ||
+        empty($siswa['nama_kelas']) ||
+        empty($siswa['tahun_ajaran_id']) ||
+        empty($siswa['nama_tahun_ajaran'])
+    ) {
+
+        $error = "Siswa belum memiliki penempatan kelas dan tahun ajaran aktif.";
+
     } elseif (!$pelanggaran) {
 
         $error = "Silakan pilih jenis pelanggaran.";
 
-    } elseif ($tanggal === '' || $tindakan === '') {
+    } elseif ($tanggal === '') {
 
-        $error = "Tanggal dan tindakan wajib diisi.";
-
-    } elseif (!in_array($status, $daftarStatus, true)) {
-
-        $error = "Status pelanggaran tidak valid.";
+        $error = "Tanggal pelanggaran wajib diisi.";
 
     } else {
 
@@ -194,11 +193,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // =====================================
 
         $nama_siswa = $siswa['nama'];
-
         $kelas_id = (int)$siswa['kelas_id'];
-
         $nama_kelas = $siswa['nama_kelas'];
-
         $tahun_ajaran_id = (int)$siswa['tahun_ajaran_id'];
 
         // =====================================
@@ -206,10 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // =====================================
 
         $nama_pelanggaran = $pelanggaran['nama'];
-
         $kategori_id = (int)$pelanggaran['pelanggaran_kategori_id'];
-
-        // Poin diambil langsung dari database
         $poin = (int)$pelanggaran['poin'];
 
         // =====================================
@@ -273,7 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 mysqli_stmt_close($stmt);
 
-                header("Location: riwayat_pelanggaran.php?pesan=berhasil");
+                header("Location: tindakan_pelanggaran.php?pesan=berhasil");
                 exit;
 
             } else {
@@ -338,9 +331,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="d-flex">
 
     <!-- SIDEBAR -->
-    <?php
-    include 'layout/sidebar_guru.php';
-    ?>
+    <?php include 'layout/sidebar.php'; ?>
 
     <!-- KONTEN UTAMA -->
     <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
@@ -541,75 +532,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             </div>
 
-                            <!-- TINDAKAN -->
-                            <div class="col-md-6 mb-3">
-
-                                <label class="form-label">
-                                    Tindakan
-                                </label>
-
-                                <select name="tindakan"
-                                        class="form-select"
-                                        required>
-
-                                    <option value="">
-                                        -- Pilih Tindakan --
-                                    </option>
-
-                                    <?php
-
-                                    $daftarTindakan = [
-                                        'Teguran lisan',
-                                        'Teguran tertulis',
-                                        'Pembinaan oleh wali kelas',
-                                        'Pemanggilan siswa',
-                                        'Pemanggilan orang tua',
-                                        'Pemanggilan orang tua dan skorsing'
-                                    ];
-
-                                    foreach ($daftarTindakan as $pilihan):
-                                    ?>
-
-                                        <option value="<?= e($pilihan) ?>"
-                                            <?= $tindakan === $pilihan ? 'selected' : '' ?>>
-
-                                            <?= e($pilihan) ?>
-
-                                        </option>
-
-                                    <?php endforeach; ?>
-
-                                </select>
-
-                            </div>
-
-                            <!-- STATUS -->
+                            <!-- STATUS OTOMATIS -->
                             <div class="col-md-6 mb-3">
 
                                 <label class="form-label">
                                     Status Penanganan
                                 </label>
 
-                                <select name="status"
-                                        class="form-select"
-                                        required>
+                                <input type="text"
+                                       class="form-control"
+                                       value="Pending"
+                                       readonly>
 
-                                    <option value="tercatat"
-                                        <?= $status === 'tercatat' ? 'selected' : '' ?>>
-                                        Tercatat
-                                    </option>
-
-                                    <option value="ditindaklanjuti"
-                                        <?= $status === 'ditindaklanjuti' ? 'selected' : '' ?>>
-                                        Ditindaklanjuti
-                                    </option>
-
-                                    <option value="selesai"
-                                        <?= $status === 'selesai' ? 'selected' : '' ?>>
-                                        Selesai
-                                    </option>
-
-                                </select>
+                                <small class="text-muted">
+                                    Pelanggaran baru akan masuk ke halaman Tindakan Pelanggaran.
+                                </small>
 
                             </div>
 
@@ -635,16 +572,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             <button type="submit"
                                     class="btn btn-primary">
-
                                 Simpan Pelanggaran
-
                             </button>
 
                             <a href="riwayat_pelanggaran.php"
                                class="btn btn-secondary">
-
                                 Kembali
-
                             </a>
 
                         </div>
@@ -694,7 +627,6 @@ $('#siswa_id').select2({
 function tampilkanDataSiswa() {
 
     const pilihan = document.getElementById('siswa_id');
-
     const option = pilihan.options[pilihan.selectedIndex];
 
     if (!option || !option.value) {
@@ -728,7 +660,6 @@ function tampilkanDataSiswa() {
 function tampilkanPoin() {
 
     const pilihan = document.getElementById('pelanggaran_id');
-
     const option = pilihan.options[pilihan.selectedIndex];
 
     document.getElementById('poin').value =

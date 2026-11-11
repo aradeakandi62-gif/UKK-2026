@@ -1,9 +1,21 @@
-
 <?php
-session_start();
+require_once __DIR__ . '/includes/cek_session.php';
+require_once __DIR__ . '/config/akses.php';
+require_once __DIR__ . '/config/koneksi.php';
 
-include 'config/koneksi.php';
-include 'includes/cek_session.php';
+wajib_role(['admin', 'guru_wali_kelas', 'wali_kelas']);
+
+$namaPengguna = $_SESSION['nama'] ?? $_SESSION['name'] ?? $_SESSION['username'] ?? 'Pengguna';
+$userId = (int) ($_SESSION['id'] ?? 0);
+$guruId = (int) ($_SESSION['guru_id'] ?? 0);
+$role = strtolower(trim((string) ($_SESSION['role'] ?? '')));
+
+$role = match ($role) {
+    'administrator' => 'admin',
+    'guru sekaligus wali kelas' => 'guru_wali_kelas',
+    'wali kelas' => 'wali_kelas',
+    default => $role
+};
 
 // Fungsi menghitung jumlah data
 function hitungData($koneksi, $tabel) {

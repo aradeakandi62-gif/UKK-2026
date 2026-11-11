@@ -26,48 +26,69 @@ function e($value) {
 // ===============================
 $cari = trim($_GET['cari'] ?? '');
 
-$where = "";
+$where = "WHERE status = 'Selesai'";
 
 if ($cari !== '') {
     $keyword = mysqli_real_escape_string($koneksi, $cari);
 
-    $where = "WHERE nama_siswa LIKE '%$keyword%'
-              OR nama_kelas LIKE '%$keyword%'";
+    $where .= " AND (
+        nama_siswa LIKE '%$keyword%'
+        OR nama_kelas LIKE '%$keyword%'
+    )";
 }
 
 // ===============================
 // TOTAL SISWA YANG MELANGGAR
+// HANYA STATUS SELESAI
 // ===============================
 $querySiswa = mysqli_query($koneksi, "
     SELECT COUNT(DISTINCT siswa_id) AS total
     FROM t_pelanggaran_siswa
     WHERE siswa_id IS NOT NULL
+    AND status = 'Selesai'
 ");
+
+if (!$querySiswa) {
+    die("Query total siswa gagal: " . mysqli_error($koneksi));
+}
 
 $totalSiswa = (int) mysqli_fetch_assoc($querySiswa)['total'];
 
 // ===============================
 // TOTAL PELANGGARAN
+// HANYA STATUS SELESAI
 // ===============================
 $queryPelanggaran = mysqli_query($koneksi, "
     SELECT COUNT(*) AS total
     FROM t_pelanggaran_siswa
+    WHERE status = 'Selesai'
 ");
+
+if (!$queryPelanggaran) {
+    die("Query total pelanggaran gagal: " . mysqli_error($koneksi));
+}
 
 $totalPelanggaran = (int) mysqli_fetch_assoc($queryPelanggaran)['total'];
 
 // ===============================
 // TOTAL SELURUH POIN
+// HANYA STATUS SELESAI
 // ===============================
 $queryPoin = mysqli_query($koneksi, "
     SELECT COALESCE(SUM(poin), 0) AS total
     FROM t_pelanggaran_siswa
+    WHERE status = 'Selesai'
 ");
+
+if (!$queryPoin) {
+    die("Query total poin gagal: " . mysqli_error($koneksi));
+}
 
 $totalPoin = (int) mysqli_fetch_assoc($queryPoin)['total'];
 
 // ===============================
 // REKAP POIN PER SISWA
+// HANYA STATUS SELESAI
 // ===============================
 $query = mysqli_query($koneksi, "
     SELECT
@@ -92,7 +113,7 @@ if (!$query) {
 // ===============================
 $dashboard = ($role === 'guru')
     ? 'dashboard_guru.php'
-    : 'dashboard.php';
+    : 'dashboard_wali_kelas.php';
 
 ?>
 
@@ -162,8 +183,6 @@ $dashboard = ($role === 'guru')
 
         <?php
         if ($role === 'guru') {
-            include 'layout/sidebar_guru.php';
-        } else {
             include 'layout/sidebar.php';
         }
         ?>
@@ -172,7 +191,7 @@ $dashboard = ($role === 'guru')
 
     <!-- KONTEN UTAMA -->
     <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
-        
+
         <div class="container-fluid">
 
             <!-- JUDUL -->
@@ -183,7 +202,7 @@ $dashboard = ($role === 'guru')
                 </h3>
 
                 <p class="text-muted">
-                    Ringkasan total poin setiap siswa.
+                    Ringkasan total poin setiap siswa berdasarkan pelanggaran yang sudah selesai ditangani.
                 </p>
 
             </div>
@@ -372,7 +391,7 @@ $dashboard = ($role === 'guru')
 
                                     <tr>
                                         <td colspan="6" class="text-center text-muted py-4">
-                                            Data rekap poin siswa tidak ditemukan.
+                                            Belum ada data pelanggaran yang selesai ditangani.
                                         </td>
                                     </tr>
 
@@ -407,8 +426,8 @@ $dashboard = ($role === 'guru')
             <div class="mt-3">
 
                 <small class="text-muted">
-                    Rekap poin diperbarui otomatis berdasarkan data
-                    pelanggaran siswa yang tersimpan di database.
+                    Rekap poin hanya menghitung pelanggaran dengan status Selesai.
+                    Pelanggaran berstatus Pending dan Proses tidak dihitung.
                 </small>
 
             </div>

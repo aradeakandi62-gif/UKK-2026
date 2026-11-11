@@ -1,7 +1,8 @@
+
 <?php
 session_start();
 
-if (isset($_SESSION['login'])) {
+if (isset($_SESSION['login']) && $_SESSION['login'] === true) {
     header("Location: dashboard.php");
     exit;
 }
@@ -31,12 +32,11 @@ if (isset($_SESSION['login'])) {
         <div class="bg-black border border-white border-2 rounded-4 shadow p-5"
              style="width: 400px;">
 
-            <!-- Judul -->
             <h2 class="text-center fw-bold mb-4">
                 Login
             </h2>
 
-            <!-- Pesan -->
+            <!-- PESAN -->
             <?php if (isset($_GET['pesan'])): ?>
 
                 <?php if ($_GET['pesan'] == 'gagal'): ?>
@@ -51,15 +51,19 @@ if (isset($_SESSION['login'])) {
                         Anda berhasil logout.
                     </div>
 
+                <?php elseif ($_GET['pesan'] == 'role'): ?>
+
+                    <div class="alert alert-warning">
+                        Role akun tidak dikenali!
+                    </div>
+
                 <?php endif; ?>
 
             <?php endif; ?>
 
-
             <!-- FORM LOGIN -->
             <form action="proses_login.php" method="POST">
 
-                <!-- Email -->
                 <div class="mb-3">
 
                     <label class="form-label fw-bold">
@@ -76,8 +80,6 @@ if (isset($_SESSION['login'])) {
 
                 </div>
 
-
-                <!-- Password -->
                 <div class="mb-4">
 
                     <label class="form-label fw-bold">
@@ -94,8 +96,6 @@ if (isset($_SESSION['login'])) {
 
                 </div>
 
-
-                <!-- Tombol -->
                 <button
                     type="submit"
                     class="btn btn-dark border border-white border-2 w-100 fw-bold py-2"
@@ -110,5 +110,4 @@ if (isset($_SESSION['login'])) {
     </div>
 
 </body>
-
 </html>

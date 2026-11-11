@@ -45,14 +45,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 Riwayat
             </a>
         </li>
-
-        <li class="nav-item">
-            <a href="Laporan.php"
-               class="nav-link text-white <?= basename($_SERVER['PHP_SELF']) == 'Laporan_guru.php' ? 'active' : '' ?>">
-                Laporan
-            </a>
-        </li>
-
     </ul>
 
     <div class="mt-auto pt-3 border-top">

@@ -1,103 +1,105 @@
 
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $current_page = basename($_SERVER['PHP_SELF']);
+$role = strtolower(trim($_SESSION['role'] ?? ''));
+
+// MENU BERDASARKAN ROLE
+if ($role === 'admin') {
+
+    $menu = [
+        ['Dashboard', 'dashboard.php'],
+        ['Data Siswa', 'data_siswa.php'],
+        ['Data Guru', 'data_guru.php'],
+        ['Kelas', 'data_kelas.php'],
+        ['Tahun Ajaran', 'tahun_ajaran.php'],
+        ['Penempatan Siswa', 'penempatan_siswa.php'],
+        ['Wali Kelas', 'wali_kelas.php'],
+        ['Kategori Pelanggaran', 'kategori_pelanggaran.php'],
+        ['Jenis Pelanggaran', 'jenis_pelanggaran.php'],
+        ['Laporan', 'laporan.php'],
+        ['About Me', 'about_me.php']
+    ];
+
+} elseif ($role === 'guru') {
+
+    $menu = [
+        ['Dashboard', 'dashboard.php'],
+        ['Catat Pelanggaran', 'catat_pelanggaran.php'],
+        ['Tindakan', 'tindakan_pelanggaran.php'],
+        ['Rekap Poin', 'rekap_poin.php'],
+        ['Riwayat', 'riwayat_pelanggaran.php']
+    ];
+
+} elseif ($role === 'wali_kelas') {
+
+    $menu = [
+        ['Dashboard', 'dashboard.php'],
+        ['Catat Pelanggaran', 'catat_pelanggaran.php'],
+        ['Tindakan', 'tindakan_pelanggaran.php'],
+        ['Rekap Poin', 'rekap_poin.php'],
+        ['Riwayat', 'riwayat_pelanggaran.php'],
+        ['Laporan', 'laporan.php']
+    ];
+
+} else {
+
+    $menu = [];
+
+}
 ?>
 
 <div class="bg-dark text-white min-vh-100 d-flex flex-column p-3"
-     style="width: 275px; position: fixed; top: 0; left: 0;">
+     style="width:275px; position:fixed; top:0; left:0; overflow-y:auto; z-index:1000;">
 
-    <!-- JUDUL SIDEBAR -->
+    <!-- JUDUL -->
     <h5 class="text-white fw-bold mb-4">
         ⚙️ Sistem Sekolah
     </h5>
 
-    <!-- MENU SIDEBAR -->
+    <!-- INFORMASI PENGGUNA -->
+    <div class="mb-3 border-bottom border-secondary pb-3">
+
+        <div class="fw-bold">
+            <?= htmlspecialchars($_SESSION['name'] ?? 'Pengguna') ?>
+        </div>
+
+        <small class="text-secondary">
+            <?= htmlspecialchars(ucwords(str_replace('_', ' ', $role))) ?>
+        </small>
+
+    </div>
+
+    <!-- MENU -->
     <ul class="nav nav-pills flex-column gap-2">
 
-        <li class="nav-item">
-            <a href="dashboard.php"
-               class="nav-link <?= ($current_page == 'dashboard.php') ? 'active' : 'text-white' ?>">
-                Dashboard
-            </a>
-        </li>
+        <?php foreach ($menu as $item): ?>
 
-        <li class="nav-item">
-            <a href="data_siswa.php"
-               class="nav-link <?= ($current_page == 'data_siswa.php') ? 'active' : 'text-white' ?>">
-                Data Siswa
-            </a>
-        </li>
+            <li class="nav-item">
 
-        <li class="nav-item">
-            <a href="data_guru.php"
-               class="nav-link <?= ($current_page == 'data_guru.php') ? 'active' : 'text-white' ?>">
-                Data Guru
-            </a>
-        </li>
+                <a href="<?= htmlspecialchars($item[1]) ?>"
+                   class="nav-link <?= ($current_page === $item[1]) ? 'active' : 'text-white' ?>">
 
-        <li class="nav-item">
-            <a href="data_kelas.php"
-               class="nav-link <?= ($current_page == 'data_kelas.php') ? 'active' : 'text-white' ?>">
-                Kelas
-            </a>
-        </li>
+                    <?= htmlspecialchars($item[0]) ?>
 
-        <li class="nav-item">
-            <a href="tahun_ajaran.php"
-               class="nav-link <?= ($current_page == 'tahun_ajaran.php') ? 'active' : 'text-white' ?>">
-                Tahun Ajaran
-            </a>
-        </li>
+                </a>
 
-        <li class="nav-item">
-            <a href="penempatan_siswa.php"
-               class="nav-link <?= ($current_page == 'penempatan_siswa.php') ? 'active' : 'text-white' ?>">
-                Penempatan Siswa
-            </a>
-        </li>
+            </li>
 
-        <li class="nav-item">
-            <a href="wali_kelas.php"
-               class="nav-link <?= ($current_page == 'wali_kelas.php') ? 'active' : 'text-white' ?>">
-                Wali Kelas
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="kategori_pelanggaran.php"
-               class="nav-link <?= ($current_page == 'kategori_pelanggaran.php') ? 'active' : 'text-white' ?>">
-                Kategori Pelanggaran
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="jenis_pelanggaran.php"
-               class="nav-link <?= ($current_page == 'jenis_pelanggaran.php') ? 'active' : 'text-white' ?>">
-                Jenis Pelanggaran
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="laporan.php"
-               class="nav-link <?= ($current_page == 'laporan.php') ? 'active' : 'text-white' ?>">
-                Laporan
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="about_me.php"
-               class="nav-link <?= ($current_page == 'about_me.php') ? 'active' : 'text-white' ?>">
-                About Me
-            </a>
-        </li>
+        <?php endforeach; ?>
 
     </ul>
 
-    <!-- LOGOUT DI BAGIAN BAWAH -->
+    <!-- LOGOUT -->
     <div class="mt-auto pt-3 border-top border-secondary">
+
         <a href="logout.php" class="nav-link text-danger">
             Logout
         </a>
+
     </div>
 
 </div>
