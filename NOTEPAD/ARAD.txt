@@ -1,0 +1,6 @@
+REVISI 
+1.BATASIN KOLOM NIP GURU
+2.sesuaikan cetak laporan pada wali kelas dokumen harus berstandar dokumen sekolah
+3.benerin fitur no urut data siswa
+===========================================================
+Buat 1 file kode PHP dengan nama aritmatika.php untuk menghitung pertambahan dan pengurangan 2 nilai, nilai 1 (10), nilai 2 (5).

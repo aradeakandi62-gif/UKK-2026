@@ -57,89 +57,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-md-3 col-lg-2 bg-dark text-white min-vh-100 p-3">
+    <!-- SIDEBAR -->
+    <?php include 'layout/sidebar.php'; ?>
 
-    <h4 class="text-white mb-4">My Website</h4>
-
-    <ul class="nav flex-column gap-2">
-
-        <li class="nav-item">
-            <a href="dashboard.php" class="nav-link text-white text-decoration-none">
-                Dashboard
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="kelola_siswa.php" class="nav-link text-white text-decoration-none">
-                Data Siswa
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="kelola_guru.php" class="nav-link text-white text-decoration-none">
-                Data Guru
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="kelola_kelas.php" class="nav-link text-white text-decoration-none">
-                Kelas
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="tahun_ajaran.php" class="nav-link text-white text-decoration-none">
-                Tahun Ajaran
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="penempatan_siswa.php" class="nav-link text-white text-decoration-none">
-                Penempatan Siswa
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="wali_kelas.php" class="nav-link text-white text-decoration-none">
-                Wali Kelas
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="kelola_jenis_pelanggaran.php" class="nav-link text-white text-decoration-none">
-                Kategori Pelanggaran
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="jenis_pelanggaran.php" class="nav-link text-white text-decoration-none">
-                Jenis Pelanggaran
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="laporan.php" class="nav-link text-white text-decoration-none">
-                Laporan
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="about.php" class="nav-link text-white text-decoration-none">
-                About Me
-            </a>
-        </li>
-
-        <li class="nav-item mt-2">
-            <a href="logout.php" class="nav-link text-danger text-decoration-none">
-                Logout
-            </a>
-        </li>
-
-    </ul>
-
-</div>
-
+    <!-- KONTEN -->
+    <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
 
         <div class="col-md-10 p-4">
             <h2>Tambah Kelas</h2>

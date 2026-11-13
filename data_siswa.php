@@ -38,11 +38,15 @@ function e($value) {
 
     <title>Data Siswa</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+     <!-- Bootstrap 5 -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
 
-    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
-          rel="stylesheet">
+    <!-- DataTables Bootstrap 5 -->
+    <link
+        href="https://cdn.datatables.net/2.3.2/css/dataTables.bootstrap5.min.css"
+        rel="stylesheet">
 </head>
 
 <body class="bg-light">
@@ -168,11 +172,16 @@ function e($value) {
 
 </div>
 
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
+
+<script src="https://cdn.datatables.net/2.3.2/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
 $(document).ready(function () {
@@ -181,7 +190,7 @@ $(document).ready(function () {
 
         pageLength: 10,
 
-        lengthMenu: [5, 10, 25, 50, 100],
+        lengthMenu: [10, 25, 50, 100],
 
         order: [[1, 'asc']],
 

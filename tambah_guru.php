@@ -14,8 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $status_aktif = (int) ($_POST['status_aktif'] ?? 1);
 
-    if ($nip === '' || $nama === '' || $email === '' || $password === '') {
-        $error = 'Semua data wajib diisi!';
+     if (!ctype_digit($nis) || strlen($nis) != 15) {
+        $error = "NIS harus tepat 15 digit angka!";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Format email tidak valid!';
     } elseif (strlen($password) < 6) {
@@ -181,14 +181,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <form method="POST" action="">
 
                     <div class="mb-3">
-                        <label class="form-label">NIP</label>
+
+                        <label class="form-label">NIP (18 Digit)</label>
+
                         <input type="text"
                                name="nip"
                                class="form-control"
-                               placeholder="Masukkan NIP"
-                               value="<?= htmlspecialchars($_POST['nip'] ?? '') ?>"
+                               placeholder="Masukkan 18 digit NIP"
+                               maxlength="18"
+                               minlength="18"
+                               pattern="[0-9]{18}"
+                               inputmode="numeric"
+                               value="<?= htmlspecialchars($_POST['nis'] ?? '') ?>"
                                required>
+
+                        <small class="text-muted">
+                            NIP harus tepat 18 digit angka.
+                        </small>
+
                     </div>
+
 
                     <div class="mb-3">
                         <label class="form-label">Nama Guru</label>
