@@ -146,6 +146,7 @@ if ($_SESSION['role'] == 'guru') {
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
+
 $(document).ready(function () {
 
     $('#tabelWaliKelas').DataTable({
@@ -155,6 +156,15 @@ $(document).ready(function () {
         lengthMenu: [5, 10, 25, 50, 100],
 
         order: [[0, 'asc']],
+
+        columnDefs: [
+            {
+                targets: 0,
+                className: 'text-start',
+                orderable: false,
+                searchable: false
+            }
+        ],
 
         language: {
 
@@ -184,6 +194,7 @@ $(document).ready(function () {
     });
 
 });
+
 </script>
 
 </body>

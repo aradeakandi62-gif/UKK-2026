@@ -14,7 +14,7 @@ function e($value) {
     );
 }
 
-// Query data jenis pelanggaran dan kategori
+// Mengambil data jenis pelanggaran
 $sql = "SELECT
             p.id,
             p.kode,
@@ -40,31 +40,29 @@ if (!$query) {
 <html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>Data Jenis Pelanggaran</title>
 
-    <!-- BOOTSTRAP 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet">
 
-    <!-- DATATABLES BOOTSTRAP 5 -->
-    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
-          rel="stylesheet">
-
+    <!-- DataTables Bootstrap -->
+    <link
+        href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
+        rel="stylesheet">
 </head>
 
 <body>
 
 <div class="container-fluid">
-
     <div class="row">
 
         <!-- SIDEBAR -->
         <?php include 'layout/sidebar.php'; ?>
-
 
         <!-- KONTEN UTAMA -->
         <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
@@ -75,8 +73,6 @@ if (!$query) {
                 Kelola data jenis pelanggaran siswa.
             </p>
 
-
-            <!-- CARD DATA -->
             <div class="card shadow-sm">
 
                 <!-- HEADER -->
@@ -88,15 +84,12 @@ if (!$query) {
 
                     <a href="tambah_jenis_pelanggaran.php"
                        class="btn btn-primary btn-sm">
-
                         + Tambah Jenis Pelanggaran
-
                     </a>
 
                 </div>
 
-
-                <!-- BODY CARD -->
+                <!-- BODY -->
                 <div class="card-body">
 
                     <div class="table-responsive">
@@ -104,144 +97,89 @@ if (!$query) {
                         <table id="tabelPelanggaran"
                                class="table table-bordered table-striped table-hover align-middle w-100">
 
-                            <!-- HEADER TABEL -->
                             <thead class="table-dark">
-
                                 <tr>
-
                                     <th>No</th>
-
                                     <th>Kode</th>
-
                                     <th>Nama Pelanggaran</th>
-
                                     <th>Kategori</th>
-
                                     <th>Poin</th>
-
                                     <th>Deskripsi</th>
-
                                     <th>Status</th>
-
                                     <th>Aksi</th>
-
                                 </tr>
-
                             </thead>
 
-
-                            <!-- ISI TABEL -->
                             <tbody>
 
-                                <?php
+                                <?php while ($row = mysqli_fetch_assoc($query)): ?>
 
-                                $no = 1;
+                                    <tr>
 
-                                while ($row = mysqli_fetch_assoc($query)):
+                                        <!-- NOMOR DIISI DATATABLES -->
+                                        <td></td>
 
-                                ?>
+                                        <td>
+                                            <?= e($row['kode']); ?>
+                                        </td>
 
-                                <tr>
+                                        <td>
+                                            <?= e($row['nama']); ?>
+                                        </td>
 
-                                    <!-- NOMOR -->
-                                    <td>
-                                        <?= $no++; ?>
-                                    </td>
+                                        <td>
+                                            <?= e($row['nama_kategori'] ?? '-'); ?>
+                                        </td>
 
-
-                                    <!-- KODE -->
-                                    <td>
-                                        <?= e($row['kode']); ?>
-                                    </td>
-
-
-                                    <!-- NAMA PELANGGARAN -->
-                                    <td>
-                                        <?= e($row['nama']); ?>
-                                    </td>
-
-
-                                    <!-- KATEGORI -->
-                                    <td>
-                                        <?= e($row['nama_kategori'] ?? '-'); ?>
-                                    </td>
-
-
-                                    <!-- POIN -->
-                                    <td>
-
-                                        <span class="badge bg-info text-dark">
-
-                                            <?= (int)$row['poin']; ?> poin
-
-                                        </span>
-
-                                    </td>
-
-
-                                    <!-- DESKRIPSI -->
-                                    <td>
-                                        <?= e($row['deskripsi'] ?: '-'); ?>
-                                    </td>
-
-
-                                    <!-- STATUS -->
-                                    <td>
-
-                                        <?php if ((int)$row['status_aktif'] === 1): ?>
-
-                                            <span class="badge bg-success">
-                                                Aktif
+                                        <td>
+                                            <span class="badge bg-info text-dark">
+                                                <?= (int)$row['poin']; ?> poin
                                             </span>
+                                        </td>
 
-                                        <?php else: ?>
+                                        <td>
+                                            <?= e($row['deskripsi'] ?: '-'); ?>
+                                        </td>
 
-                                            <span class="badge bg-secondary">
-                                                Tidak Aktif
-                                            </span>
+                                        <td>
+                                            <?php if ((int)$row['status_aktif'] === 1): ?>
+                                                <span class="badge bg-success">
+                                                    Aktif
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary">
+                                                    Tidak Aktif
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
 
-                                        <?php endif; ?>
+                                        <td>
+                                            <div class="d-flex gap-2">
 
-                                    </td>
+                                                <a href="edit_jenis_pelanggaran.php?id=<?= (int)$row['id']; ?>"
+                                                   class="btn btn-warning btn-sm">
+                                                    Edit
+                                                </a>
 
+                                                <form action="hapus_jenis_pelanggaran.php"
+                                                      method="POST"
+                                                      onsubmit="return confirm('Yakin ingin menghapus jenis pelanggaran ini?');">
 
-                                    <!-- AKSI -->
-                                    <td>
+                                                    <input type="hidden"
+                                                           name="id"
+                                                           value="<?= (int)$row['id']; ?>">
 
-                                        <div class="d-flex gap-2">
+                                                    <button type="submit"
+                                                            class="btn btn-danger btn-sm">
+                                                        Hapus
+                                                    </button>
 
-                                            <!-- EDIT -->
-                                            <a href="edit_jenis_pelanggaran.php?id=<?= (int)$row['id']; ?>"
-                                               class="btn btn-warning btn-sm">
+                                                </form>
 
-                                                Edit
+                                            </div>
+                                        </td>
 
-                                            </a>
-
-
-                                            <!-- HAPUS -->
-                                            <form action="hapus_jenis_pelanggaran.php"
-                                                  method="POST"
-                                                  onsubmit="return confirm('Yakin ingin menghapus jenis pelanggaran ini?');">
-
-                                                <input type="hidden"
-                                                       name="id"
-                                                       value="<?= (int)$row['id']; ?>">
-
-                                                <button type="submit"
-                                                        class="btn btn-danger btn-sm">
-
-                                                    Hapus
-
-                                                </button>
-
-                                            </form>
-
-                                        </div>
-
-                                    </td>
-
-                                </tr>
+                                    </tr>
 
                                 <?php endwhile; ?>
 
@@ -252,56 +190,77 @@ if (!$query) {
                     </div>
 
                 </div>
-
             </div>
 
         </main>
-
     </div>
-
 </div>
 
-
-<!-- BOOTSTRAP JAVASCRIPT -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-
-
-<!-- JQUERY -->
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- DATATABLES -->
+<!-- DataTables -->
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
-
-
-<!-- DATATABLES BOOTSTRAP 5 -->
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
 
-
-<!-- KONFIGURASI DATATABLES -->
 <script>
-
 $(document).ready(function () {
 
     $('#tabelPelanggaran').DataTable({
 
-        // Jumlah data awal
-        pageLength: 10,
+        // Tampilkan 12 data setiap halaman
+        pageLength: 12,
 
         // Pilihan jumlah data
-        lengthMenu: [5, 10, 25, 50, 100],
+        lengthMenu: [12, 25, 50, 100],
 
-        // Mengaktifkan sortir
+        // Fitur tabel
         ordering: true,
-
-        // Mengaktifkan pencarian
         searching: true,
-
-        // Mengaktifkan pagination
         paging: true,
-
-        // Informasi jumlah data
         info: true,
+
+        // Urutkan nama pelanggaran
+        order: [[2, 'asc']],
+
+        // Pengaturan kolom
+        columnDefs: [
+            {
+                targets: 0,
+                orderable: false,
+                searchable: false
+            },
+            {
+                targets: 7,
+                orderable: false,
+                searchable: false
+            }
+        ],
+
+        // HITUNG ULANG NOMOR SETIAP TABEL BERUBAH
+        drawCallback: function () {
+
+            var api = this.api();
+
+            // Mengambil informasi halaman aktif
+            var informasi = api.page.info();
+
+            // Nomor awal berdasarkan halaman
+            var nomorAwal = informasi.start;
+
+            // Mengisi ulang nomor pada halaman yang sedang tampil
+            api.column(0, {
+                page: 'current'
+            }).nodes().each(function (cell, index) {
+
+                cell.innerHTML = nomorAwal + index + 1;
+
+            });
+
+        },
 
         // Bahasa Indonesia
         language: {
@@ -321,37 +280,17 @@ $(document).ready(function () {
             search: "Cari:",
 
             paginate: {
-
                 first: "Pertama",
-
                 last: "Terakhir",
-
                 next: "Berikutnya",
-
                 previous: "Sebelumnya"
-
             }
 
-        },
-
-        // Pengaturan kolom
-        columnDefs: [
-
-            {
-                targets: [0, 7],
-                orderable: false,
-                searchable: false
-            }
-
-        ],
-
-        // Urutkan berdasarkan nama pelanggaran
-        order: [[2, 'asc']]
+        }
 
     });
 
 });
-
 </script>
 
 </body>

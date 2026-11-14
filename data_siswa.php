@@ -38,7 +38,7 @@ function e($value) {
 
     <title>Data Siswa</title>
 
-     <!-- Bootstrap 5 -->
+    <!-- Bootstrap 5 -->
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet">
@@ -54,14 +54,7 @@ function e($value) {
 <div class="d-flex">
 
     <!-- SIDEBAR -->
-    <?php
-    // Gunakan sidebar yang memang tersedia
-    if ($role === 'guru') {
-        include __DIR__ . '/layout/sidebar.php';
-    } else {
-        include __DIR__ . '/layout/sidebar.php';
-    }
-    ?>
+    <?php include __DIR__ . '/layout/sidebar.php'; ?>
 
     <!-- KONTEN UTAMA -->
     <main class="col-md-9 col-lg-10 offset-md-3 offset-lg-2 p-4">
@@ -102,6 +95,7 @@ function e($value) {
                                     <th>Nama Siswa</th>
                                     <th>Jenis Kelamin</th>
                                     <th>Status</th>
+
                                     <?php if ($role === 'admin'): ?>
                                         <th>Aksi</th>
                                     <?php endif; ?>
@@ -110,14 +104,11 @@ function e($value) {
 
                             <tbody>
 
-                            <?php
-                            $no = 1;
-
-                            while ($data = mysqli_fetch_assoc($query)):
-                            ?>
+                            <?php while ($data = mysqli_fetch_assoc($query)): ?>
 
                                 <tr>
-                                    <td><?= $no++; ?></td>
+                                    <!-- Nomor diisi otomatis oleh DataTables -->
+                                    <td></td>
 
                                     <td><?= e($data['nis']); ?></td>
 
@@ -184,6 +175,7 @@ function e($value) {
 <script src="https://cdn.datatables.net/2.3.2/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
+
 $(document).ready(function () {
 
     $('#tabelSiswa').DataTable({
@@ -192,14 +184,41 @@ $(document).ready(function () {
 
         lengthMenu: [10, 25, 50, 100],
 
+        // Urutan data berdasarkan NIS
         order: [[1, 'asc']],
 
         columnDefs: [
             {
+                targets: 0,
                 orderable: false,
-                targets: [0, <?= $role === 'admin' ? '5' : '0' ?>]
+                searchable: false
+            },
+            {
+                targets: <?= $role === 'admin' ? '5' : '4' ?>,
+                orderable: false
             }
         ],
+
+        // Nomor selalu dimulai dari 1 pada halaman pertama
+        drawCallback: function () {
+
+            let api = this.api();
+
+            let info = api.page.info();
+
+            api.rows({
+                page: 'current',
+                order: 'applied',
+                search: 'applied'
+            }).nodes().each(function (row, index) {
+
+                $(row).find('td:first').text(
+                    info.start + index + 1
+                );
+
+            });
+
+        },
 
         language: {
             search: "Cari:",
@@ -221,8 +240,6 @@ $(document).ready(function () {
 
 });
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

@@ -244,76 +244,71 @@ if (!$hasil) {
 <!-- KONFIGURASI DATATABLES -->
 <script>
 
+
 $(document).ready(function () {
 
-    $('#tabelkelas').DataTable({
+    $('#tabelSiswa').DataTable({
 
-        // Jumlah data awal
         pageLength: 10,
 
-        // Pilihan jumlah data
-        lengthMenu: [5, 10, 25, 50, 100],
+        lengthMenu: [10, 25, 50, 100],
 
-        // Mengaktifkan pengurutan
-        ordering: true,
+        // Urutan data berdasarkan NIS
+        order: [[1, 'asc']],
 
-        // Mengaktifkan pencarian
-        searching: true,
-
-        // Mengaktifkan pagination
-        paging: true,
-
-        // Mengaktifkan informasi jumlah data
-        info: true,
-
-        // Bahasa Indonesia
-        language: {
-
-            emptyTable: "Belum ada data kelas",
-
-            zeroRecords: "Data kelas tidak ditemukan",
-
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-
-            infoEmpty: "Menampilkan 0 data",
-
-            infoFiltered: "(difilter dari _MAX_ total data)",
-
-            lengthMenu: "Tampilkan _MENU_ data",
-
-            search: "Cari:",
-
-            paginate: {
-
-                first: "Pertama",
-
-                last: "Terakhir",
-
-                next: "Berikutnya",
-
-                previous: "Sebelumnya"
-
+        columnDefs: [
+            {
+                targets: 0,
+                orderable: false,
+                searchable: false
+            },
+            {
+                targets: <?= $role === 'admin' ? '5' : '4' ?>,
+                orderable: false
             }
+        ],
+
+        // Nomor selalu dimulai dari 1 pada halaman pertama
+        drawCallback: function () {
+
+            let api = this.api();
+
+            let info = api.page.info();
+
+            api.rows({
+                page: 'current',
+                order: 'applied',
+                search: 'applied'
+            }).nodes().each(function (row, index) {
+
+                $(row).find('td:first').text(
+                    info.start + index + 1
+                );
+
+            });
 
         },
 
-        // Pengaturan kolom
-        columnDefs: [
-
-            {
-                targets: [0, 5],
-                orderable: false,
-                searchable: false
+        language: {
+            search: "Cari:",
+            lengthMenu: "Tampilkan _MENU_ data",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Menampilkan 0 sampai 0 data",
+            infoFiltered: "(difilter dari _MAX_ total data)",
+            zeroRecords: "Data siswa tidak ditemukan",
+            emptyTable: "Belum ada data siswa",
+            paginate: {
+                first: "Pertama",
+                last: "Terakhir",
+                next: "Berikutnya",
+                previous: "Sebelumnya"
             }
-
-        ],
-
-        // Urutkan berdasarkan nama kelas
-        order: [[1, 'asc']]
+        }
 
     });
 
 });
+
 
 </script>
 

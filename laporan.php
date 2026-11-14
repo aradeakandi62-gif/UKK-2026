@@ -6,7 +6,19 @@ require_once __DIR__ . '/config/koneksi.php';
 require_once __DIR__ . '/includes/cek_session.php';
 
 // ==================================================
-// 1. LOGIN DAN HAK AKSES
+// 1. IDENTITAS SEKOLAH
+// ==================================================
+// Ganti bagian ini sesuai identitas sekolah sebenarnya.
+$namaSekolah = '[Smk Muhammadiyah]';
+$alamatSekolah = '[l. Rumah Sakit No. 29, Kelurahan Empangsari, Kecamatan Tawang, Kota Tasikmalaya, Jawa Barat]';
+$emailSekolah = '[smksmuhammadiyahtsm@gmail.com]';
+$teleponSekolah = '[327380]';
+$namaKepalaSekolah = '[Wawan Kurniawan, S.Pd.I]';
+$nipKepalaSekolah = '[197106172021011917]';
+$tempatCetak = '[KOTA/KABUPATEN]';
+
+// ==================================================
+// 2. LOGIN DAN HAK AKSES
 // ==================================================
 $userId = (int)($_SESSION['id'] ?? 0);
 $role = strtolower(trim($_SESSION['role'] ?? ''));
@@ -28,7 +40,7 @@ $isAdmin = ($role === 'admin');
 $isWali = !$isAdmin;
 
 // ==================================================
-// 2. FUNGSI BANTU
+// 3. FUNGSI BANTU
 // ==================================================
 function e($value)
 {
@@ -44,7 +56,7 @@ function ambilData($koneksi, $sql, $types = '', $params = [])
     $stmt = mysqli_prepare($koneksi, $sql);
 
     if (!$stmt) {
-        die('Query gagal: ' . mysqli_error($koneksi));
+        die('Query gagal: ' . e(mysqli_error($koneksi)));
     }
 
     if ($types !== '') {
@@ -61,7 +73,7 @@ function ambilData($koneksi, $sql, $types = '', $params = [])
     }
 
     if (!mysqli_stmt_execute($stmt)) {
-        die('Eksekusi gagal: ' . mysqli_stmt_error($stmt));
+        die('Eksekusi gagal: ' . e(mysqli_stmt_error($stmt)));
     }
 
     $result = mysqli_stmt_get_result($stmt);
@@ -108,42 +120,55 @@ function kolomAda($koneksi, $tabel, $kolom)
     return false;
 }
 
+function formatTanggal($tanggal)
+{
+    if (empty($tanggal)) {
+        return '-';
+    }
+
+    $waktu = strtotime($tanggal);
+
+    return $waktu ? date('d-m-Y', $waktu) : '-';
+}
+
 // ==================================================
-// 3. KOLOM TAHUN AJARAN
+// 4. MENENTUKAN KOLOM TAHUN AJARAN
 // ==================================================
 if (kolomAda($koneksi, 't_tahun_ajaran', 'nama')) {
     $kolomTahun = 'nama';
-} elseif (
-    kolomAda($koneksi, 't_tahun_ajaran', 'nama_tahun_ajaran')
-) {
+} elseif (kolomAda($koneksi, 't_tahun_ajaran', 'nama_tahun_ajaran')) {
     $kolomTahun = 'nama_tahun_ajaran';
 } else {
     die('Kolom nama tahun ajaran tidak ditemukan.');
 }
 
 // ==================================================
-// 4. MENGAMBIL DATA GURU LOGIN
+// 5. MENGAMBIL DATA GURU LOGIN
 // ==================================================
 $guruId = 0;
+$namaWaliKelas = $_SESSION['name'] ?? '........................';
 
 if ($isWali) {
     $dataGuru = ambilData(
         $koneksi,
-        "SELECT id FROM t_guru WHERE user_id = ? LIMIT 1",
+        "SELECT id, nama
+         FROM t_guru
+         WHERE user_id = ?
+         LIMIT 1",
         'i',
         [$userId]
     );
 
     if (!empty($dataGuru)) {
         $guruId = (int)$dataGuru[0]['id'];
+        $namaWaliKelas = $dataGuru[0]['nama'];
     }
 }
 
 // ==================================================
-// 5. DAFTAR TAHUN AJARAN
+// 6. DAFTAR TAHUN AJARAN
 // ==================================================
 if ($isWali) {
-
     if ($guruId > 0) {
         $tahunList = ambilData(
             $koneksi,
@@ -162,9 +187,7 @@ if ($isWali) {
     } else {
         $tahunList = [];
     }
-
 } else {
-
     $tahunList = ambilData(
         $koneksi,
         "SELECT
@@ -176,7 +199,7 @@ if ($isWali) {
 }
 
 // ==================================================
-// 6. FILTER TAHUN AJARAN
+// 7. FILTER TAHUN AJARAN
 // ==================================================
 $tahunId = isset($_GET['tahun_ajaran'])
     ? (int)$_GET['tahun_ajaran']
@@ -194,10 +217,9 @@ if (!in_array($tahunId, $daftarTahun, true)) {
 }
 
 // ==================================================
-// 7. DAFTAR KELAS
+// 8. DAFTAR KELAS
 // ==================================================
 if ($isWali) {
-
     if ($guruId > 0 && $tahunId > 0) {
         $kelasList = ambilData(
             $koneksi,
@@ -217,9 +239,7 @@ if ($isWali) {
     } else {
         $kelasList = [];
     }
-
 } else {
-
     $kelasList = ambilData(
         $koneksi,
         "SELECT id, nama
@@ -229,7 +249,7 @@ if ($isWali) {
 }
 
 // ==================================================
-// 8. FILTER KELAS
+// 9. FILTER KELAS
 // ==================================================
 $kelasId = isset($_GET['kelas'])
     ? (int)$_GET['kelas']
@@ -247,7 +267,7 @@ if (!in_array($kelasId, $daftarKelas, true)) {
 }
 
 // ==================================================
-// 9. DAFTAR SISWA
+// 10. DAFTAR SISWA
 // ==================================================
 $siswaList = [];
 
@@ -270,7 +290,7 @@ if ($tahunId > 0 && $kelasId > 0) {
 }
 
 // ==================================================
-// 10. FILTER SISWA DAN TANGGAL
+// 11. FILTER SISWA DAN TANGGAL
 // ==================================================
 $siswaId = isset($_GET['siswa'])
     ? (int)$_GET['siswa']
@@ -295,14 +315,33 @@ if (
 }
 
 // ==================================================
-// 11. AMBIL DATA LAPORAN
+// 12. NAMA TAHUN AJARAN DAN KELAS
+// ==================================================
+$namaTahun = '-';
+$namaKelas = '-';
+
+foreach ($tahunList as $th) {
+    if ((int)$th['id'] === $tahunId) {
+        $namaTahun = $th['nama_tahun'];
+        break;
+    }
+}
+
+foreach ($kelasList as $kl) {
+    if ((int)$kl['id'] === $kelasId) {
+        $namaKelas = $kl['nama'];
+        break;
+    }
+}
+
+// ==================================================
+// 13. MENGAMBIL DATA LAPORAN
 // ==================================================
 $dataLaporan = [];
 $totalPelanggaran = 0;
 $totalPoin = 0;
 
 if ($tahunId > 0 && $kelasId > 0) {
-
     $sql = "
         SELECT
             ps.id,
@@ -374,10 +413,19 @@ if ($tahunId > 0 && $kelasId > 0) {
 }
 
 // ==================================================
-// 12. EXPORT EXCEL
+// 14. URL FILTER
+// ==================================================
+$queryFilter = http_build_query([
+    'tahun_ajaran' => $tahunId,
+    'kelas' => $kelasId,
+    'siswa' => $siswaId,
+    'tanggal' => $tanggal
+]);
+
+// ==================================================
+// 15. EXPORT EXCEL
 // ==================================================
 if (isset($_GET['export']) && $_GET['export'] === 'excel') {
-
     $namaFile = 'Laporan_Pelanggaran_' .
         date('Y-m-d_H-i-s') . '.xls';
 
@@ -388,17 +436,16 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
 
     echo "\xEF\xBB\xBF";
     ?>
-
-    <html>
+    <!DOCTYPE html>
+    <html lang="id">
     <head>
         <meta charset="UTF-8">
     </head>
-
     <body>
-
-        <h2>LAPORAN PELANGGARAN SISWA</h2>
-
-        <p>Tahun Ajaran: <?= e($namaTahun ?? '') ?></p>
+        <h3>LAPORAN REKAPITULASI PELANGGARAN SISWA</h3>
+        <p>Sekolah: <?= e($namaSekolah) ?></p>
+        <p>Tahun Ajaran: <?= e($namaTahun) ?></p>
+        <p>Kelas: <?= e($namaKelas) ?></p>
         <p>Total Pelanggaran: <?= $totalPelanggaran ?></p>
         <p>Total Poin: <?= $totalPoin ?></p>
 
@@ -415,49 +462,49 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
                     <th>Tindakan</th>
                 </tr>
             </thead>
-
             <tbody>
-                <?php foreach ($dataLaporan as $i => $row): ?>
-                    <tr>
-                        <td><?= $i + 1 ?></td>
-                        <td><?= e(date('d-m-Y', strtotime($row['tanggal']))) ?></td>
-                        <td><?= e($row['nama_siswa']) ?></td>
-                        <td><?= e($row['nama_kelas']) ?></td>
-                        <td><?= e($row['nama_pelanggaran']) ?></td>
-                        <td><?= (int)$row['poin'] ?></td>
-                        <td><?= e($row['keterangan']) ?></td>
-                        <td><?= e($row['tindakan']) ?></td>
-                    </tr>
-                <?php endforeach; ?>
-
-                <?php if (empty($dataLaporan)): ?>
+                <?php if (!empty($dataLaporan)): ?>
+                    <?php foreach ($dataLaporan as $i => $row): ?>
+                        <tr>
+                            <td><?= $i + 1 ?></td>
+                            <td><?= e(formatTanggal($row['tanggal'])) ?></td>
+                            <td><?= e($row['nama_siswa']) ?></td>
+                            <td><?= e($row['nama_kelas']) ?></td>
+                            <td><?= e($row['nama_pelanggaran']) ?></td>
+                            <td><?= (int)$row['poin'] ?></td>
+                            <td><?= e($row['keterangan']) ?></td>
+                            <td><?= e($row['tindakan']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
                     <tr>
                         <td colspan="8">Tidak ada data laporan.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="5">Total</th>
+                    <th><?= $totalPoin ?></th>
+                    <th colspan="2"><?= $totalPelanggaran ?> Pelanggaran</th>
+                </tr>
+            </tfoot>
         </table>
-
     </body>
     </html>
-
     <?php
     exit;
 }
 
 // ==================================================
-// 13. SIDEBAR SESUAI ROLE
+// 16. SIDEBAR SESUAI ROLE
 // ==================================================
 if ($isAdmin) {
-    $dashboard = 'dashboard.php';
-
     $sidebarCandidates = [
         __DIR__ . '/layout/sidebar.php',
         __DIR__ . '/layout/sidebar_admin.php'
     ];
 } else {
-    $dashboard = 'dashboard_wali_kelas.php';
-
     $sidebarCandidates = [
         __DIR__ . '/layout/sidebar_wali_kelas.php',
         __DIR__ . '/layout/sidebar_guru.php',
@@ -474,48 +521,16 @@ foreach ($sidebarCandidates as $candidate) {
     }
 }
 
-// ==================================================
-// 14. NAMA TAHUN AJARAN DAN KELAS
-// ==================================================
-$namaTahun = '-';
-$namaKelas = '-';
-
-foreach ($tahunList as $th) {
-    if ((int)$th['id'] === $tahunId) {
-        $namaTahun = $th['nama_tahun'];
-        break;
-    }
-}
-
-foreach ($kelasList as $kl) {
-    if ((int)$kl['id'] === $kelasId) {
-        $namaKelas = $kl['nama'];
-        break;
-    }
-}
-
-// ==================================================
-// 15. URL FILTER
-// ==================================================
-$queryFilter = http_build_query([
-    'tahun_ajaran' => $tahunId,
-    'kelas' => $kelasId,
-    'siswa' => $siswaId,
-    'tanggal' => $tanggal
-]);
-
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Laporan Pelanggaran</title>
+    <title>Laporan Pelanggaran Siswa</title>
 
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
@@ -541,11 +556,6 @@ $queryFilter = http_build_query([
             overflow-x: hidden;
         }
 
-        /*
-         * LAYOUT UTAMA
-         * Wrapper sidebar menyediakan ruang 220px.
-         * Konten menggunakan flex agar tidak tertutup sidebar.
-         */
         .layout-wrapper {
             display: flex;
             align-items: stretch;
@@ -554,26 +564,21 @@ $queryFilter = http_build_query([
         }
 
         .sidebar-holder {
-            flex: 0 0 220px;
-            width: 220px;
-            min-width: 220px;
+            flex: 0 0 275px;
+            width: 275px;
+            min-width: 275px;
             min-height: 100vh;
             position: relative;
             z-index: 10;
         }
 
-        /*
-         * Sidebar yang menggunakan position fixed
-         * tetap berada pada kolom sebelah kiri.
-         */
         .sidebar-holder > * {
-            max-width: 220px;
+            max-width: 275px;
         }
 
         .content-area {
             flex: 1 1 0;
             min-width: 0;
-            width: auto;
             padding: 24px;
             position: relative;
         }
@@ -585,10 +590,15 @@ $queryFilter = http_build_query([
             padding: 0;
         }
 
+        .card {
+            border: none;
+            border-radius: 12px;
+        }
+
         .stat-card {
             border: none;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
         }
 
         .stat-icon {
@@ -607,11 +617,11 @@ $queryFilter = http_build_query([
         .table th,
         .table td {
             vertical-align: middle;
-            white-space: nowrap;
         }
 
-        .card {
-            border-radius: 12px;
+        .print-header,
+        .print-signature {
+            display: none;
         }
 
         @media (max-width: 768px) {
@@ -631,37 +641,186 @@ $queryFilter = http_build_query([
             }
         }
 
-        @media print {
-            @page {
-                size: landscape;
-                margin: 10mm;
-            }
+        /* ==================================
+           FORMAT DOKUMEN RESMI SAAT CETAK
+        ================================== */
+       
+@media print {
 
-            .sidebar-holder,
-            .d-print-none {
-                display: none !important;
-            }
+    @page {
+        size: A4 landscape;
+        margin: 8mm 10mm;
+    }
 
-            .layout-wrapper {
-                display: block !important;
-            }
+    html,
+    body {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+        color: black !important;
+        font-family: "Times New Roman", serif !important;
+        font-size: 9pt !important;
+    }
 
-            .content-area {
-                width: 100% !important;
-                padding: 0 !important;
-            }
+    .sidebar-holder,
+    .d-print-none,
+    .btn,
+    button,
+    .screen-title,
+    .summary-cards {
+        display: none !important;
+    }
 
-            .card {
-                box-shadow: none !important;
-                border: 1px solid #ddd !important;
-            }
+    .layout-wrapper {
+        display: block !important;
+        width: 100% !important;
+        min-height: 0 !important;
+    }
 
-            .table {
-                font-size: 11px;
-            }
-        }
+    .content-area,
+    .container-fluid {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    #area-cetak {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .print-header,
+    .print-signature {
+        display: block !important;
+    }
+
+    .print-header {
+        margin-bottom: 5px !important;
+    }
+
+    .print-header h6 {
+        font-size: 10pt !important;
+        margin-bottom: 2px !important;
+    }
+
+    .print-header h4 {
+        font-size: 15pt !important;
+        margin-bottom: 3px !important;
+    }
+
+    .print-header p {
+        font-size: 9pt !important;
+        margin-bottom: 3px !important;
+    }
+
+    .print-title {
+        font-size: 12pt !important;
+        text-align: center !important;
+        font-weight: bold !important;
+        text-decoration: underline !important;
+        margin: 8px 0 3px !important;
+    }
+
+    .print-subtitle {
+        font-size: 9pt !important;
+        text-align: center !important;
+        margin-bottom: 8px !important;
+    }
+
+    .print-header table {
+        width: 100% !important;
+        margin-bottom: 6px !important;
+        font-size: 9pt !important;
+    }
+
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .card-body {
+        padding: 0 !important;
+    }
+
+    .table-responsive {
+        overflow: visible !important;
+    }
+
+    .table {
+        width: 100% !important;
+        margin: 0 !important;
+        border-collapse: collapse !important;
+        table-layout: auto !important;
+        font-family: "Times New Roman", serif !important;
+        font-size: 8.5pt !important;
+    }
+
+    .table th,
+    .table td {
+        border: 1px solid black !important;
+        padding: 3px 4px !important;
+        color: black !important;
+        background: white !important;
+        white-space: normal !important;
+        vertical-align: middle !important;
+    }
+
+    .table thead {
+        display: table-header-group !important;
+    }
+
+    .table tfoot {
+        display: table-row-group !important;
+    }
+
+    .table thead th {
+        text-align: center !important;
+        font-weight: bold !important;
+    }
+
+    .table tr {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .print-signature {
+        margin-top: 12px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .print-signature .row {
+        display: flex !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .print-signature .col-6 {
+        width: 50% !important;
+        flex: 0 0 50% !important;
+    }
+
+    .print-signature p {
+        font-size: 9pt !important;
+        margin-bottom: 2px !important;
+    }
+
+    .signature-space {
+        height: 35px !important;
+    }
+
+    .badge {
+        color: black !important;
+        background: white !important;
+        border: none !important;
+    }
+
+}
+
     </style>
-
 </head>
 
 <body>
@@ -670,19 +829,13 @@ $queryFilter = http_build_query([
 
     <!-- SIDEBAR -->
     <aside class="sidebar-holder">
-
         <?php if ($sidebarPath !== null): ?>
-
             <?php include $sidebarPath; ?>
-
         <?php else: ?>
-
             <div class="alert alert-danger m-2">
                 File sidebar tidak ditemukan.
             </div>
-
         <?php endif; ?>
-
     </aside>
 
     <!-- KONTEN -->
@@ -690,27 +843,91 @@ $queryFilter = http_build_query([
 
         <div class="container-fluid">
 
-            <div class="mb-4">
-
-                <h2 class="fw-bold">
-                    Laporan Pelanggaran
-                </h2>
+            <div class="screen-title mb-4">
+                <h2 class="fw-bold">Laporan Pelanggaran</h2>
 
                 <p class="text-muted mb-0">
-                    Laporan pelanggaran siswa di kelas yang Anda walikan.
+                    <?php if ($isWali): ?>
+                        Laporan pelanggaran siswa di kelas yang Anda walikan.
+                    <?php else: ?>
+                        Laporan seluruh pelanggaran siswa.
+                    <?php endif; ?>
                 </p>
-
             </div>
 
             <div id="area-cetak">
 
-                <!-- KARTU TOTAL -->
-                <div class="row g-3 mb-4">
+                <!-- ==================================
+                     KOP SURAT DOKUMEN SEKOLAH
+                =================================== -->
+                <div class="print-header">
+
+                    <div class="text-center">
+
+                        <h4 class="fw-bold mb-1">
+                            <?= e($namaSekolah) ?>
+                        </h4>
+
+                        <p class="mb-1">
+                            <?= e($alamatSekolah) ?>
+                        </p>
+
+                        <p class="mb-2">
+                            Email: <?= e($emailSekolah) ?>
+                            |
+                            Telepon: <?= e($teleponSekolah) ?>
+                        </p>
+
+                        <hr style="border: 2px solid black; opacity: 1;">
+                        <hr style="border: 1px solid black; opacity: 1; margin-top: -8px;">
+
+                    </div>
+
+                    <h5 class="print-title">
+                        LAPORAN REKAPITULASI PELANGGARAN SISWA
+                    </h5>
+
+                    <p class="print-subtitle">
+                        TAHUN AJARAN <?= e($namaTahun) ?>
+                    </p>
+
+                    <table class="table table-borderless mb-3">
+                        <tbody>
+                            <tr>
+                                <td width="18%">Nama Sekolah</td>
+                                <td width="2%">:</td>
+                                <td><?= e($namaSekolah) ?></td>
+                            </tr>
+
+                            <tr>
+                                <td>Kelas</td>
+                                <td>:</td>
+                                <td><?= e($namaKelas) ?></td>
+                            </tr>
+
+                            <tr>
+                                <td>Wali Kelas</td>
+                                <td>:</td>
+                                <td><?= e($namaWaliKelas) ?></td>
+                            </tr>
+
+                            <tr>
+                                <td>Tanggal Cetak</td>
+                                <td>:</td>
+                                <td><?= date('d-m-Y') ?></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+
+                <!-- ==================================
+                     KARTU RINGKASAN UNTUK LAYAR
+                =================================== -->
+                <div class="row g-3 mb-4 summary-cards">
 
                     <div class="col-md-6">
-
                         <div class="card stat-card h-100">
-
                             <div class="card-body d-flex align-items-center gap-3">
 
                                 <div class="stat-icon">
@@ -728,15 +945,11 @@ $queryFilter = http_build_query([
                                 </div>
 
                             </div>
-
                         </div>
-
                     </div>
 
                     <div class="col-md-6">
-
                         <div class="card stat-card h-100">
-
                             <div class="card-body d-flex align-items-center gap-3">
 
                                 <div class="stat-icon">
@@ -754,15 +967,15 @@ $queryFilter = http_build_query([
                                 </div>
 
                             </div>
-
                         </div>
-
                     </div>
 
                 </div>
 
-                <!-- FILTER -->
-                <div class="card shadow-sm border-0 mb-4 d-print-none">
+                <!-- ==================================
+                     FILTER LAPORAN
+                =================================== -->
+                <div class="card shadow-sm mb-4 d-print-none">
 
                     <div class="card-body">
 
@@ -771,97 +984,69 @@ $queryFilter = http_build_query([
                             <div class="row g-3">
 
                                 <div class="col-md-3">
-
                                     <label class="form-label">
                                         Tahun Ajaran
                                     </label>
 
-                                    <select
-                                        name="tahun_ajaran"
-                                        class="form-select"
-                                    >
-
+                                    <select name="tahun_ajaran" class="form-select">
                                         <option value="">
                                             Pilih Tahun Ajaran
                                         </option>
 
                                         <?php foreach ($tahunList as $th): ?>
-
                                             <option
                                                 value="<?= (int)$th['id'] ?>"
                                                 <?= $tahunId === (int)$th['id'] ? 'selected' : '' ?>
                                             >
                                                 <?= e($th['nama_tahun']) ?>
                                             </option>
-
                                         <?php endforeach; ?>
-
                                     </select>
-
                                 </div>
 
                                 <div class="col-md-3">
-
                                     <label class="form-label">
                                         Kelas
                                     </label>
 
-                                    <select
-                                        name="kelas"
-                                        class="form-select"
-                                    >
-
+                                    <select name="kelas" class="form-select">
                                         <option value="">
                                             Pilih Kelas
                                         </option>
 
                                         <?php foreach ($kelasList as $kl): ?>
-
                                             <option
                                                 value="<?= (int)$kl['id'] ?>"
                                                 <?= $kelasId === (int)$kl['id'] ? 'selected' : '' ?>
                                             >
                                                 <?= e($kl['nama']) ?>
                                             </option>
-
                                         <?php endforeach; ?>
-
                                     </select>
-
                                 </div>
 
                                 <div class="col-md-3">
-
                                     <label class="form-label">
                                         Siswa
                                     </label>
 
-                                    <select
-                                        name="siswa"
-                                        class="form-select"
-                                    >
-
+                                    <select name="siswa" class="form-select">
                                         <option value="0">
                                             Semua Siswa
                                         </option>
 
                                         <?php foreach ($siswaList as $s): ?>
-
                                             <option
                                                 value="<?= (int)$s['id'] ?>"
                                                 <?= $siswaId === (int)$s['id'] ? 'selected' : '' ?>
                                             >
                                                 <?= e($s['nama']) ?>
                                             </option>
-
                                         <?php endforeach; ?>
-
                                     </select>
-
                                 </div>
 
                                 <div class="col-md-3">
-
                                     <label class="form-label">
                                         Tanggal
                                     </label>
@@ -872,25 +1057,18 @@ $queryFilter = http_build_query([
                                         class="form-control"
                                         value="<?= e($tanggal) ?>"
                                     >
-
                                 </div>
 
                             </div>
 
                             <div class="mt-3 d-flex gap-2">
 
-                                <button
-                                    type="submit"
-                                    class="btn btn-primary"
-                                >
+                                <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-search"></i>
                                     Cari
                                 </button>
 
-                                <a
-                                    href="laporan.php"
-                                    class="btn btn-secondary"
-                                >
+                                <a href="laporan.php" class="btn btn-secondary">
                                     <i class="bi bi-arrow-counterclockwise"></i>
                                     Reset
                                 </a>
@@ -900,25 +1078,26 @@ $queryFilter = http_build_query([
                         </form>
 
                     </div>
-
                 </div>
 
-                <!-- DATA LAPORAN -->
-                <div class="card shadow-sm border-0">
+                <!-- ==================================
+                     TABEL DATA LAPORAN
+                =================================== -->
+                <div class="card shadow-sm">
 
                     <div class="card-body">
 
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
 
                             <div>
-
                                 <h5 class="fw-bold mb-1">
                                     <i class="bi bi-file-earmark-text"></i>
                                     Data Laporan
                                 </h5>
 
                                 <div class="text-muted small">
-                                    Guru: <?= e($_SESSION['name'] ?? $_SESSION['nama'] ?? 'Pengguna') ?>
+                                    <?= $isAdmin ? 'Administrator' : 'Wali Kelas' ?>:
+                                    <?= e($namaWaliKelas) ?>
                                 </div>
 
                                 <div class="text-muted small">
@@ -926,7 +1105,6 @@ $queryFilter = http_build_query([
                                     |
                                     Tahun Ajaran: <?= e($namaTahun) ?>
                                 </div>
-
                             </div>
 
                             <div class="d-flex gap-2 d-print-none">
@@ -957,18 +1135,16 @@ $queryFilter = http_build_query([
                             <table class="table table-bordered table-striped align-middle mb-0">
 
                                 <thead class="table-dark">
-
                                     <tr>
-                                        <th>No</th>
-                                        <th>Tanggal</th>
+                                        <th class="text-center" width="4%">No</th>
+                                        <th class="text-center" width="11%">Tanggal</th>
                                         <th>Nama Siswa</th>
-                                        <th>Kelas</th>
-                                        <th>Pelanggaran</th>
-                                        <th>Poin</th>
+                                        <th class="text-center">Kelas</th>
+                                        <th>Jenis Pelanggaran</th>
+                                        <th class="text-center">Poin</th>
                                         <th>Keterangan</th>
                                         <th>Tindakan</th>
                                     </tr>
-
                                 </thead>
 
                                 <tbody>
@@ -976,22 +1152,20 @@ $queryFilter = http_build_query([
                                     <?php if (!empty($dataLaporan)): ?>
 
                                         <?php foreach ($dataLaporan as $i => $row): ?>
-
                                             <tr>
+                                                <td class="text-center">
+                                                    <?= $i + 1 ?>
+                                                </td>
 
-                                                <td><?= $i + 1 ?></td>
-
-                                                <td>
-                                                    <?= !empty($row['tanggal'])
-                                                        ? e(date('d-m-Y', strtotime($row['tanggal'])))
-                                                        : '-' ?>
+                                                <td class="text-center">
+                                                    <?= e(formatTanggal($row['tanggal'])) ?>
                                                 </td>
 
                                                 <td>
                                                     <?= e($row['nama_siswa']) ?>
                                                 </td>
 
-                                                <td>
+                                                <td class="text-center">
                                                     <?= e($row['nama_kelas']) ?>
                                                 </td>
 
@@ -999,33 +1173,25 @@ $queryFilter = http_build_query([
                                                     <?= e($row['nama_pelanggaran']) ?>
                                                 </td>
 
-                                                <td>
-                                                    <span class="badge bg-danger">
-                                                        <?= (int)$row['poin'] ?>
-                                                    </span>
+                                                <td class="text-center">
+                                                    <?= (int)$row['poin'] ?>
                                                 </td>
 
                                                 <td>
-                                                    <?= e($row['keterangan']) ?>
+                                                    <?= e($row['keterangan'] ?: '-') ?>
                                                 </td>
 
                                                 <td>
-                                                    <?= e($row['tindakan']) ?>
+                                                    <?= e($row['tindakan'] ?: '-') ?>
                                                 </td>
-
                                             </tr>
-
                                         <?php endforeach; ?>
 
                                     <?php else: ?>
 
                                         <tr>
                                             <td colspan="8" class="text-center py-4">
-                                                <i class="bi bi-inbox fs-3 text-muted"></i>
-
-                                                <div class="text-muted mt-2">
-                                                    Tidak ada data pelanggaran.
-                                                </div>
+                                                Tidak ada data pelanggaran.
                                             </td>
                                         </tr>
 
@@ -1033,33 +1199,76 @@ $queryFilter = http_build_query([
 
                                 </tbody>
 
-                                <?php if (!empty($dataLaporan)): ?>
+                                <tfoot>
+                                    <tr class="fw-bold">
+                                        <td colspan="5" class="text-end">
+                                            TOTAL
+                                        </td>
 
-                                    <tfoot class="table-light fw-bold">
+                                        <td class="text-center">
+                                            <?= $totalPoin ?>
+                                        </td>
 
-                                        <tr>
-
-                                            <td colspan="5" class="text-end">
-                                                Total
-                                            </td>
-
-                                            <td>
-                                                <span class="badge bg-danger">
-                                                    <?= $totalPoin ?> Poin
-                                                </span>
-                                            </td>
-
-                                            <td colspan="2">
-                                                <?= $totalPelanggaran ?> Pelanggaran
-                                            </td>
-
-                                        </tr>
-
-                                    </tfoot>
-
-                                <?php endif; ?>
+                                        <td colspan="2">
+                                            <?= $totalPelanggaran ?> Pelanggaran
+                                        </td>
+                                    </tr>
+                                </tfoot>
 
                             </table>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ==================================
+                     TANDA TANGAN DOKUMEN
+                =================================== -->
+                <div class="print-signature">
+
+                    <div class="row">
+
+                        <div class="col-6 text-center">
+
+                            <p>Mengetahui,</p>
+
+                            <p class="fw-bold">
+                                Kepala Sekolah
+                            </p>
+
+                            <br><br><br>
+
+                            <p class="fw-bold mb-0">
+                                <?= e($namaKepalaSekolah) ?>
+                            </p>
+
+                            <p class="mb-0">
+                                NIP. <?= e($nipKepalaSekolah) ?>
+                            </p>
+
+                        </div>
+
+                        <div class="col-6 text-center">
+
+                            <p>
+                                <?= e($tempatCetak) ?>,
+                                <?= date('d-m-Y') ?>
+                            </p>
+
+                            <p class="fw-bold">
+                                Wali Kelas <?= e($namaKelas) ?>
+                            </p>
+
+                            <br><br><br>
+
+                            <p class="fw-bold mb-0">
+                                <?= e($namaWaliKelas) ?>
+                            </p>
+
+                            <p class="mb-0">
+                                NIP. ....................................
+                            </p>
 
                         </div>
 
@@ -1068,6 +1277,7 @@ $queryFilter = http_build_query([
                 </div>
 
             </div>
+            <!-- AKHIR AREA CETAK -->
 
         </div>
 
