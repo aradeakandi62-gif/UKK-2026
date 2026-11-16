@@ -5,9 +5,11 @@ session_start();
 include 'config/koneksi.php';
 include 'includes/cek_session.php';
 
-$role = strtolower(trim($_SESSION['role'] ?? ''));
+$current_page = basename($_SERVER['PHP_SELF']);
 
-// Ambil data penempatan siswa
+$role = strtolower($_SESSION['role'] ?? 'guru');
+
+// Query data penempatan siswa
 $sql = "
     SELECT
         ks.id,
@@ -26,224 +28,245 @@ $sql = "
 $query = mysqli_query($koneksi, $sql);
 
 if (!$query) {
-    die('Gagal mengambil data penempatan: ' .
-        htmlspecialchars(mysqli_error($koneksi)));
+    die("Query gagal: " . mysqli_error($koneksi));
 }
 
-function e($value) {
-    return htmlspecialchars(
-        (string)($value ?? '-'),
-        ENT_QUOTES,
-        'UTF-8'
-    );
+// Fungsi keamanan output
+function e($value)
+{
+    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Data Penempatan Siswa</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
-          rel="stylesheet">
+    <!-- DataTables Bootstrap 5 -->
+    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+
 </head>
 
 <body class="bg-light">
 
-<div class="d-flex">
-
-    <!-- SIDEBAR -->
+    <!-- Sidebar -->
     <?php include __DIR__ . '/layout/sidebar.php'; ?>
 
-    <!-- KONTEN UTAMA -->
-    <main class="flex-grow-1 p-4" style="margin-left: 275px; min-width: 0;">
+    <!-- Konten Utama -->
+    <main class="p-4" style="margin-left: 275px; min-width: 0;">
 
-        <h2 class="fw-bold mb-1">Data Penempatan Siswa</h2>
+        <div class="container-fluid">
 
-        <p class="text-muted mb-4">
-            Kelola penempatan siswa berdasarkan kelas dan tahun ajaran.
-        </p>
+            <!-- Judul Halaman -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <div class="card shadow-sm">
-
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-
-                <h5 class="mb-0">Data Penempatan Siswa</h5>
+                <div>
+                    <h3 class="fw-bold mb-1">Data Penempatan Siswa</h3>
+                    <p class="text-muted mb-0">
+                        Kelola data penempatan siswa berdasarkan kelas dan tahun ajaran.
+                    </p>
+                </div>
 
                 <?php if ($role === 'admin'): ?>
-                    <a href="tambah_penempatan_siswa.php"
-                       class="btn btn-primary btn-sm">
+                    <a href="tambah_penempatan_siswa.php" class="btn btn-primary">
                         + Tambah Penempatan
                     </a>
                 <?php endif; ?>
 
             </div>
 
-            <div class="card-body">
+            <!-- Card Tabel -->
+            <div class="card border-0 shadow-sm">
 
-                <div class="table-responsive">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">Daftar Penempatan Siswa</h5>
+                </div>
 
-                    <table id="tabelPenempatan"
-                           class="table table-bordered table-striped table-hover align-middle w-100">
+                <div class="card-body">
 
-                        <thead class="table-dark">
-                            <tr>
-                                <th>No</th>
-                                <th>NIS</th>
-                                <th>Nama Siswa</th>
-                                <th>Kelas</th>
-                                <th>Tahun Ajaran</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
+                    <div class="table-responsive">
 
-                        <tbody>
-                            <?php while ($row = mysqli_fetch_assoc($query)): ?>
+                        <table id="tabelPenempatan" class="table table-bordered table-striped table-hover align-middle w-100">
+
+                            <thead class="table-dark">
                                 <tr>
-                                    <td></td>
+                                    <th width="50">No</th>
+                                    <th>NIS</th>
+                                    <th>Nama Siswa</th>
+                                    <th>Kelas</th>
+                                    <th>Tahun Ajaran</th>
+                                    <th>Status</th>
+                                    <th width="280">Tindakan</th>
+                                </tr>
+                            </thead>
 
-                                    <td><?= e($row['nis']); ?></td>
+                            <tbody>
 
-                                    <td><?= e($row['nama_siswa']); ?></td>
+                                <?php while ($row = mysqli_fetch_assoc($query)): ?>
 
-                                    <td><?= e($row['nama_kelas']); ?></td>
+                                    <tr>
+                                        <td></td>
 
-                                    <td><?= e($row['nama_tahun_ajaran']); ?></td>
+                                        <td>
+                                            <?= e($row['nis']); ?>
+                                        </td>
 
-                                    <!-- STATUS AKTIF -->
-                                    <td>
-                                     <?php if ((int)$row['status_aktif'] === 1): ?>
-                                        <span class="badge bg-success">
-                                    Aktif
-                                </span>
+                                        <td>
+                                            <?= e($row['nama_siswa']); ?>
+                                        </td>
 
-                            <?php else: ?>
+                                        <td>
+                                            <?= e($row['nama_kelas']); ?>
+                                        </td>
 
-                                <span class="badge bg-danger">
-                                    Tidak Aktif
-                                </span>
+                                        <td>
+                                            <?= e($row['nama_tahun_ajaran']); ?>
+                                        </td>
 
-                            <?php endif; ?>
-                        </td>
+                                        <td>
+                                            <?php if ((int)$row['status_aktif'] === 1): ?>
+                                                <span class="badge bg-success">Aktif</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary">Tidak Aktif</span>
+                                            <?php endif; ?>
+                                        </td>
 
-                                    <!-- AKSI -->
-                                    <td>
-                                        <div class="d-flex gap-2">
+                                        <!-- TINDAKAN -->
+                                        <td>
 
                                             <?php if ($role === 'admin'): ?>
 
-                                                <a href="edit_penempatan.php?id=<?= (int)$row['id']; ?>"
-                                                   class="btn btn-warning btn-sm">
-                                                    Edit
-                                                </a>
+                                                <div class="d-flex align-items-center gap-2 flex-nowrap">
 
-                                                <form action="hapus_penempatan.php"
-                                                      method="POST"
-                                                      class="d-inline"
-                                                      onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                                    <!-- Tombol Edit -->
+                                                    <a href="edit_penempatan.php?id=<?= (int)$row['id']; ?>"
+                                                       class="btn btn-warning btn-sm text-nowrap">
+                                                        Edit
+                                                    </a>
 
-                                                    <input type="hidden"
-                                                           name="id"
-                                                           value="<?= (int)$row['id']; ?>">
+                                                    <!-- Tombol Hapus -->
+                                                    <form action="hapus_penempatan.php"
+                                                          method="POST"
+                                                          class="m-0"
+                                                          onsubmit="return confirm('Yakin ingin menghapus data penempatan ini?')">
 
-                                                    <button type="submit"
-                                                            class="btn btn-danger btn-sm">
-                                                        Hapus
-                                                    </button>
-                                                </form>
+                                                        <input type="hidden"
+                                                               name="id"
+                                                               value="<?= (int)$row['id']; ?>">
+
+                                                        <button type="submit"
+                                                                class="btn btn-danger btn-sm text-nowrap">
+                                                            Hapus
+                                                        </button>
+
+                                                    </form>
+
+                                                    <!-- Tombol Pindah Kelas -->
+                                                    <a href="pindah_kelas.php?id=<?= (int)$row['id']; ?>"
+                                                       class="btn btn-secondary btn-sm text-nowrap">
+                                                        Pindah Kelas
+                                                    </a>
+
+                                                </div>
 
                                             <?php else: ?>
 
-                                                <span class="text-muted">-</span>
+                                                <span class="text-muted">Tidak ada tindakan</span>
 
                                             <?php endif; ?>
 
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endwhile; ?>
-                        </tbody>
+                                        </td>
 
-                    </table>
+                                    </tr>
+
+                                <?php endwhile; ?>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
 
                 </div>
-
             </div>
+
         </div>
 
     </main>
-</div>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
 
-<script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function () {
 
-<script>
-$(document).ready(function () {
+            $('#tabelPenempatan').DataTable({
 
-    $('#tabelPenempatan').DataTable({
+                pageLength: 10,
 
-        pageLength: 10,
+                lengthMenu: [
+                    [10, 25, 50, 100],
+                    [10, 25, 50, 100]
+                ],
 
-        lengthMenu: [10, 25, 50, 100],
+                order: [
+                    [1, 'asc']
+                ],
 
-        order: [[1, 'asc']],
+                columnDefs: [
+                    {
+                        targets: [0, 6],
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
 
-        columnDefs: [
-            {
-                targets: [0, 6],
-                orderable: false,
-                searchable: false
-            }
-        ],
+                language: {
+                    search: "Cari:",
+                    lengthMenu: "Tampilkan _MENU_ data",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    infoEmpty: "Tidak ada data",
+                    infoFiltered: "(difilter dari _MAX_ total data)",
+                    zeroRecords: "Data tidak ditemukan",
+                    emptyTable: "Belum ada data penempatan siswa",
+                    paginate: {
+                        first: "Pertama",
+                        last: "Terakhir",
+                        next: "Selanjutnya",
+                        previous: "Sebelumnya"
+                    }
+                },
 
-        drawCallback: function () {
+                drawCallback: function () {
+                    let api = this.api();
+                    let start = api.page.info().start;
 
-            let api = this.api();
-            let info = api.page.info();
-
-            api.column(0, {
-                page: 'current'
-            }).nodes().each(function (cell, index) {
-
-                cell.innerHTML = info.start + index + 1;
+                    api.column(0, {
+                        page: 'current'
+                    }).nodes().each(function (cell, i) {
+                        cell.innerHTML = start + i + 1;
+                    });
+                }
 
             });
 
-        },
-
-        language: {
-            search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ data",
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            infoEmpty: "Menampilkan 0 sampai 0 data",
-            infoFiltered: "(difilter dari _MAX_ total data)",
-            zeroRecords: "Data tidak ditemukan",
-            emptyTable: "Belum ada data penempatan siswa",
-
-            paginate: {
-                first: "Pertama",
-                last: "Terakhir",
-                next: "Berikutnya",
-                previous: "Sebelumnya"
-            }
-        }
-
-    });
-
-});
-</script>
+        });
+    </script>
 
 </body>
 </html>
