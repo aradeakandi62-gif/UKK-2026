@@ -5,6 +5,36 @@ session_start();
 include 'config/koneksi.php';
 include 'includes/cek_session.php';
 
+
+// ======================================
+// BUAT TABEL SURAT PEMANGGILAN OTOMATIS
+// ======================================
+
+$sqlTabel = "
+CREATE TABLE IF NOT EXISTS t_surat_pemanggilan (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    siswa_id INT NOT NULL,
+    kelas_id INT NOT NULL,
+    nis VARCHAR(30),
+    nama_siswa VARCHAR(150) NOT NULL,
+    nama_kelas VARCHAR(100) NOT NULL,
+    jumlah_pelanggaran INT DEFAULT 0,
+    total_poin INT DEFAULT 0,
+    tahap INT NOT NULL,
+    tanggal_pertemuan DATE NOT NULL,
+    waktu_pertemuan TIME NOT NULL,
+    tempat_pertemuan VARCHAR(255) NOT NULL,
+    catatan TEXT,
+    dibuat_oleh VARCHAR(150),
+    status VARCHAR(30) DEFAULT 'Dijadwalkan',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+";
+
+if (!mysqli_query($koneksi, $sqlTabel)) {
+    die("Gagal membuat tabel surat pemanggilan: " . mysqli_error($koneksi));
+}
+
 $role = strtolower(trim($_SESSION['role'] ?? ''));
 
 // Hak akses Guru dan Wali Kelas
