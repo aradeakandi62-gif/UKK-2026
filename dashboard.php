@@ -374,7 +374,7 @@ $total_pelanggaran = $data_pelanggaran['total'];
 
                             <div class="d-flex justify-content-between">
                                 <span>Nama Aplikasi</span>
-                                <strong>UKK-2026</strong>
+                                <strong>sistem-sekolabor</strong>
                             </div>
 
                             <div class="d-flex justify-content-between mt-3">

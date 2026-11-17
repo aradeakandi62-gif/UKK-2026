@@ -14,8 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $status_aktif = (int) ($_POST['status_aktif'] ?? 1);
 
-     if (!ctype_digit($nis) || strlen($nis) != 15) {
-        $error = "NIS harus tepat 15 digit angka!";
+     if (!ctype_digit($nip) || strlen($nip) != 18) {
+        $error = "NIP harus tepat 18 digit angka!";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Format email tidak valid!';
     } elseif (strlen($password) < 6) {
